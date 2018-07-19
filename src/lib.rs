@@ -1,0 +1,75 @@
+extern crate mdbook;
+extern crate pulldown_cmark;
+extern crate pulldown_cmark_to_cmark;
+
+use mdbook::errors::{Error, Result};
+use mdbook::book::{Book, BookItem, Chapter};
+use mdbook::preprocess::{Preprocessor, PreprocessorContext};
+use pulldown_cmark::{Event, Parser, Tag};
+use pulldown_cmark_to_cmark::fmt::cmark;
+
+pub struct Mermaid;
+
+impl Preprocessor for Mermaid {
+    fn name(&self) -> &str {
+        "mermaid"
+    }
+
+    fn run(&self, _ctx: &PreprocessorContext, book: &mut Book) -> Result<()> {
+        let mut res: Option<_> = None;
+        book.for_each_mut(|item: &mut BookItem| {
+            if let Some(Err(_)) = res {
+                return;
+            }
+            if let BookItem::Chapter(ref mut chapter) = *item {
+                res = Some(Mermaid::add_mermaid(chapter).map(|md| {
+                    chapter.content = md;
+                }));
+            }
+        });
+        res.unwrap_or(Ok(()))
+    }
+}
+
+impl Mermaid {
+    fn add_mermaid(chapter: &mut Chapter) -> Result<String> {
+        let mut buf = String::with_capacity(chapter.content.len());
+        let mut mermaid_content = String::new();
+        let mut in_mermaid_block = false;
+        let events = Parser::new(&chapter.content).map(|e| {
+            if let Event::Start(Tag::CodeBlock(code)) = e.clone() {
+                if code == "mermaid" {
+                    in_mermaid_block = true;
+                    mermaid_content.clear();
+                    return None;
+                } else {
+                    return Some(e);
+                }
+            }
+
+            if !in_mermaid_block {
+                return Some(e);
+            }
+
+            match e {
+                Event::End(Tag::CodeBlock(code)) => {
+                    assert_eq!("mermaid", code, "After an opening mermaid code block we expect it to close again");
+                    in_mermaid_block = false;
+
+                    let mermaid_code = format!("<div class=\"mermaid\">{}</div>\n\n", mermaid_content);
+                    return Some(Event::Text(mermaid_code.into()));
+                },
+                Event::Text(code) => {
+                    mermaid_content.push_str(&code);
+                }
+                _ => return Some(e),
+            }
+
+            None
+        });
+        let events = events.filter_map(|e| e);
+        cmark(events, &mut buf, None)
+            .map(|_| buf)
+            .map_err(|err| Error::from(format!("Markdown serialization failed: {}", err)))
+    }
+}
