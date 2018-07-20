@@ -86,3 +86,6 @@ additional-js = ["mermaid.min.js", "mermaid-init.js"]
 
 MPL. See [LICENSE](LICENSE).  
 Copyright (c) 2018 Jan-Erik Rediger <janerik@fnordig.de>
+
+Mermaid is [MIT licensed](https://github.com/knsv/mermaid/blob/master/LICENSE).
+The bundled assets (`mermaid.css`, `mermaid.min.js`) are MIT licensed.
