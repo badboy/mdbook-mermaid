@@ -31,45 +31,77 @@ impl Preprocessor for Mermaid {
     }
 }
 
-impl Mermaid {
-    fn add_mermaid(chapter: &mut Chapter) -> Result<String> {
-        let mut buf = String::with_capacity(chapter.content.len());
-        let mut mermaid_content = String::new();
-        let mut in_mermaid_block = false;
-        let events = Parser::new(&chapter.content).map(|e| {
-            if let Event::Start(Tag::CodeBlock(code)) = e.clone() {
-                if code == "mermaid" {
-                    in_mermaid_block = true;
-                    mermaid_content.clear();
-                    return None;
-                } else {
-                    return Some(e);
-                }
-            }
-
-            if !in_mermaid_block {
+fn add_mermaid(content: &str) -> Result<String> {
+    let mut buf = String::with_capacity(content.len());
+    let mut mermaid_content = String::new();
+    let mut in_mermaid_block = false;
+    let events = Parser::new(content).map(|e| {
+        if let Event::Start(Tag::CodeBlock(code)) = e.clone() {
+            if code == "mermaid" {
+                in_mermaid_block = true;
+                mermaid_content.clear();
+                return None;
+            } else {
                 return Some(e);
             }
+        }
 
-            match e {
-                Event::End(Tag::CodeBlock(code)) => {
-                    assert_eq!("mermaid", code, "After an opening mermaid code block we expect it to close again");
-                    in_mermaid_block = false;
+        if !in_mermaid_block {
+            return Some(e);
+        }
 
-                    let mermaid_code = format!("<div class=\"mermaid\">{}</div>\n\n", mermaid_content);
-                    return Some(Event::Text(mermaid_code.into()));
-                },
-                Event::Text(code) => {
-                    mermaid_content.push_str(&code);
-                }
-                _ => return Some(e),
+        match e {
+            Event::End(Tag::CodeBlock(code)) => {
+                assert_eq!("mermaid", code, "After an opening mermaid code block we expect it to close again");
+                in_mermaid_block = false;
+
+                let mermaid_code = format!("<div class=\"mermaid\">{}</div>\n\n", mermaid_content);
+                return Some(Event::Text(mermaid_code.into()));
+            },
+            Event::Text(code) => {
+                mermaid_content.push_str(&code);
             }
+            _ => return Some(e),
+        }
 
-            None
-        });
-        let events = events.filter_map(|e| e);
-        cmark(events, &mut buf, None)
-            .map(|_| buf)
-            .map_err(|err| Error::from(format!("Markdown serialization failed: {}", err)))
+        None
+    });
+    let events = events.filter_map(|e| e);
+    cmark(events, &mut buf, None)
+        .map(|_| buf)
+        .map_err(|err| Error::from(format!("Markdown serialization failed: {}", err)))
+}
+
+impl Mermaid {
+    fn add_mermaid(chapter: &mut Chapter) -> Result<String> {
+        add_mermaid(&chapter.content)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::add_mermaid;
+
+    #[test]
+    fn adds_toc() {
+        let content = r#"# Chapter
+
+```mermaid
+graph TD
+A --> B
+```
+
+Text
+"#;
+
+        let expected = r#"# Chapter
+
+<div class="mermaid">graph TD
+A --> B
+</div>
+
+Text"#;
+
+        assert_eq!(expected, add_mermaid(content).unwrap());
     }
 }
