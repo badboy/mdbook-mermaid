@@ -1,0 +1,15 @@
+language: rust
+sudo: false
+
+rust:
+  - stable
+  - beta
+  - nightly
+
+script:
+  - |
+      cargo build &&
+      cargo test
+notifications:
+  email:
+    on_success: never
