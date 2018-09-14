@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Jan-Erik Rediger <janerik@fnordig.de>"]
 
 [dependencies]
-mdbook = "0.2.1"
+mdbook = { git = "https://github.com/rust-lang-nursery/mdBook" }
 pulldown-cmark = "0.1.2"
 pulldown-cmark-to-cmark = "1.1.0"
 env_logger = "0.5.10"
