@@ -10,6 +10,6 @@ script:
   - |
       cargo build &&
       cargo test
+
 notifications:
-  email:
-    on_success: never
+  email: false
