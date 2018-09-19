@@ -4,9 +4,10 @@ version = "0.1.0"
 authors = ["Jan-Erik Rediger <janerik@fnordig.de>"]
 
 [dependencies]
-mdbook = { git = "https://github.com/badboy/mdBook", branch = "fix-section-numbering" }
+mdbook = { git = "https://github.com/rust-lang-nursery/mdBook", branch = "custom-preprocessor" }
 pulldown-cmark = "0.1.2"
 pulldown-cmark-to-cmark = "1.1.0"
 env_logger = "0.5.10"
 log = "0.4.3"
 clap = "2.32.0"
+serde_json = "1.0"

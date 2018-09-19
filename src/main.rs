@@ -1,64 +1,62 @@
-extern crate env_logger;
+extern crate clap;
 extern crate mdbook;
 extern crate mdbook_mermaid;
-extern crate clap;
+extern crate serde_json;
 
-use mdbook::MDBook;
-use mdbook::errors::Result;
-use mdbook_mermaid::Mermaid;
 use clap::{App, ArgMatches};
+use mdbook::errors::Error;
+use mdbook::preprocessor::CmdPreprocessor;
+use mdbook::MDBook;
+use mdbook_mermaid::Mermaid;
 
-use std::env;
+use std::io;
 use std::process;
-use std::path::{Path, PathBuf};
 
-fn get_book_dir(args: &ArgMatches) -> PathBuf {
-    if let Some(dir) = args.value_of("dir") {
-        // Check if path is relative from current dir, or absolute...
-        let p = Path::new(dir);
-        if p.is_relative() {
-            env::current_dir().unwrap().join(dir)
-        } else {
-            p.to_path_buf()
-        }
-    } else {
-        env::current_dir().expect("Unable to determine the current directory")
-    }
-}
-
-pub fn make_app<'a, 'b>() -> App<'a, 'b> {
+pub fn make_app() -> App<'static, 'static> {
     App::new("mdbook-mermaid")
         .about("Build the book from the markdown files with mermaid support")
-        .arg_from_usage(
-            "-d, --dest-dir=[dest-dir] 'The output directory for your book{n}(Defaults to ./book \
-             when omitted)'",
-        )
-        .arg_from_usage(
-            "[dir] 'A directory for your book{n}(Defaults to Current Directory when omitted)'",
-        )
+        .subcommand(
+            SubCommand::with_name("supports")
+                .arg(Arg::with_name("renderer").required(true))
+                .about("Check whether a renderer is supported by this preprocessor"))
 }
 
-pub fn execute(args: &ArgMatches) -> Result<()> {
-    let book_dir = get_book_dir(args);
-    let mut book = MDBook::load(&book_dir)?;
+fn main() {
+    let matches = make_app().get_matches();
 
-    if let Some(dest_dir) = args.value_of("dest-dir") {
-        book.config.build.build_dir = PathBuf::from(dest_dir);
+    let result = match matches.subcommand_matches("supports") {
+        Some(sub_args) => handle_supports(sub_args),
+        None => handle_preprocessing(),
+    };
+
+    if let Err(e) = result {
+        eprintln!("{}", e);
+        process::exit(1);
+    }
+}
+
+fn handle_preprocessing() -> Result<(), Error> {
+    let (ctx, book) = CmdPreprocessor::parse_input(io::stdin())
+        .expect("Couldn't parse the input");
+
+    if ctx.mdbook_version != mdbook::MDBOOK_VERSION {
+        return Err(Error::from("The version check failed!"));
     }
 
-    book.with_preprecessor(Mermaid);
-    book.build()?;
+    let processed_book = Mermaid.run(&ctx, &book)?;
+    serde_json::to_writer(io::stdout(), &processed_book)?;
 
     Ok(())
 }
 
-fn main() {
-    env_logger::init();
-    let app = make_app();
-    let matches = app.get_matches();
+fn handle_supports(sub_args: &ArgMatches) {
+    let renderer = sub_args.value_of("renderer").expect("Required argument");
+    let supported = Mermaid.supports_renderer(&renderer);
 
-    if let Err(e) = execute(&matches) {
-        eprintln!("{}", e);
+    // Signal whether the renderer is supported by exiting with 1 or 0.
+    if supported {
+        process::exit(0);
+    } else {
         process::exit(1);
     }
 }
