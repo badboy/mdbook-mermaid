@@ -34,8 +34,7 @@ fn main() {
 }
 
 fn handle_preprocessing() -> Result<(), Error> {
-    let (ctx, book) = CmdPreprocessor::parse_input(io::stdin())
-        .expect("Couldn't parse the input");
+    let (ctx, book) = CmdPreprocessor::parse_input(io::stdin())?;
 
     if ctx.mdbook_version != mdbook::MDBOOK_VERSION {
         // We should probably use the `semver` crate to check compatibility
