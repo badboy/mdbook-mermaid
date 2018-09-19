@@ -3,10 +3,9 @@ extern crate mdbook;
 extern crate mdbook_mermaid;
 extern crate serde_json;
 
-use clap::{App, ArgMatches};
+use clap::{App, Arg, ArgMatches, SubCommand};
 use mdbook::errors::Error;
-use mdbook::preprocessor::CmdPreprocessor;
-use mdbook::MDBook;
+use mdbook::preprocess::{CmdPreprocessor, Preprocessor};
 use mdbook_mermaid::Mermaid;
 
 use std::io;
@@ -24,14 +23,13 @@ pub fn make_app() -> App<'static, 'static> {
 fn main() {
     let matches = make_app().get_matches();
 
-    let result = match matches.subcommand_matches("supports") {
-        Some(sub_args) => handle_supports(sub_args),
-        None => handle_preprocessing(),
-    };
-
-    if let Err(e) = result {
-        eprintln!("{}", e);
-        process::exit(1);
+    if let Some(sub_args) = matches.subcommand_matches("supports") {
+        handle_supports(sub_args);
+    } else {
+        if let Err(e) = handle_preprocessing() {
+            eprintln!("{}", e);
+            process::exit(1);
+        }
     }
 }
 
@@ -40,16 +38,23 @@ fn handle_preprocessing() -> Result<(), Error> {
         .expect("Couldn't parse the input");
 
     if ctx.mdbook_version != mdbook::MDBOOK_VERSION {
-        return Err(Error::from("The version check failed!"));
+        // We should probably use the `semver` crate to check compatibility
+        // here...
+        eprintln!(
+            "Warning: The mdbook-mermaid plugin was built against version \
+             {} of mdbook, but we're being called from version {}",
+            mdbook::MDBOOK_VERSION,
+            ctx.mdbook_version
+        );
     }
 
-    let processed_book = Mermaid.run(&ctx, &book)?;
+    let processed_book = Mermaid.run(&ctx, book)?;
     serde_json::to_writer(io::stdout(), &processed_book)?;
 
     Ok(())
 }
 
-fn handle_supports(sub_args: &ArgMatches) {
+fn handle_supports(sub_args: &ArgMatches) -> ! {
     let renderer = sub_args.value_of("renderer").expect("Required argument");
     let supported = Mermaid.supports_renderer(&renderer);
 
