@@ -57,7 +57,7 @@ fn add_mermaid(content: &str) -> Result<String> {
                 assert_eq!("mermaid", code, "After an opening mermaid code block we expect it to close again");
                 in_mermaid_block = false;
 
-                let mermaid_code = format!("<div class=\"mermaid\">{}</div>\n\n", mermaid_content);
+                let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
                 return Some(Event::Text(mermaid_code.into()));
             },
             Event::Text(code) => {
@@ -98,9 +98,9 @@ Text
 
         let expected = r#"# Chapter
 
-<div class="mermaid">graph TD
+<pre class="mermaid">graph TD
 A --> B
-</div>
+</pre>
 
 Text"#;
 
