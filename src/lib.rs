@@ -85,7 +85,7 @@ mod test {
     use super::add_mermaid;
 
     #[test]
-    fn adds_toc() {
+    fn adds_mermaid() {
         let content = r#"# Chapter
 
 ```mermaid
