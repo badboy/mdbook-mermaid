@@ -31,6 +31,10 @@ impl Preprocessor for Mermaid {
 
         res.unwrap_or(Ok(())).map(|_| book)
     }
+
+    fn supports_renderer(&self, renderer: &str) -> bool {
+        renderer == "html"
+    }
 }
 
 fn add_mermaid(content: &str) -> Result<String> {
