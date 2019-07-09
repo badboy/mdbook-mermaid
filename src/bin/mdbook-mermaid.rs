@@ -13,7 +13,7 @@ use std::process;
 
 pub fn make_app() -> App<'static, 'static> {
     App::new("mdbook-mermaid")
-        .about("Build the book from the markdown files with mermaid support")
+        .about("mdbook preprocessor to add mermaid support")
         .subcommand(
             SubCommand::with_name("supports")
                 .arg(Arg::with_name("renderer").required(true))
@@ -37,10 +37,8 @@ fn handle_preprocessing() -> Result<(), Error> {
     let (ctx, book) = CmdPreprocessor::parse_input(io::stdin())?;
 
     if ctx.mdbook_version != mdbook::MDBOOK_VERSION {
-        // We should probably use the `semver` crate to check compatibility
-        // here...
         eprintln!(
-            "Warning: The mdbook-mermaid plugin was built against version \
+            "Warning: The mdbook-mermaid preprocessor was built against version \
              {} of mdbook, but we're being called from version {}",
             mdbook::MDBOOK_VERSION,
             ctx.mdbook_version
