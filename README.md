@@ -29,12 +29,16 @@ in your book.
 If you want to use only this preprocessor, install the tool:
 
 ```
-cargo install --git https://github.com/badboy/mdbook-mermaid
+cargo install mdbook-mermaid
 ```
 
 Add the following to your `book.toml`
 
 ```toml
+[preprocessor.toc]
+command = "mdbook-mermaid"
+renderer = ["html"]
+
 [output.html]
 additional-css = ["mermaid.css"]
 additional-js = ["mermaid.min.js", "mermaid-init.js"]
@@ -45,42 +49,8 @@ Copy the files (`mermaid.css`, `mermaid.min.js`, `mermaid-init.js`) from the [`a
 Finally, build your book:
 
 ```
-mdbook-mermaid path/to/book
+mdbook path/to/book
 ```
-
-### Programmatic use
-
-You can also use this programmatically, e.g. in order to use multiple additional preprocessors.
-Add `mdbook-mermaid` as a dependency in your `Cargo.toml`:
-
-```toml
-[dependencies.mdbook-mermaid]
-git = "https://github.com/badboy/mdbook-mermaid"
-```
-
-Then add it to your code:
-
-```rust
-extern crate mdbook_mermaid;
-
-// ...
-
-let mut book = MDBook::load(&book_dir)?;
-book.with_preprecessor(mdbook_mermaid::Mermaid);
-```
-
-Don't forget to copy the files (`mermaid.css`, `mermaid.min.js`, `mermaid-init.js`) from the [`assets/`] (assets) directory into your source directory.
-
-Add the following to your `book.toml` to include these files in your build:
-
-```toml
-[output.html]
-additional-css = ["mermaid.css"]
-additional-js = ["mermaid.min.js", "mermaid-init.js"]
-```
-
-
-
 
 ## License
 

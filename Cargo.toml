@@ -2,6 +2,10 @@
 name = "mdbook-mermaid"
 version = "0.1.0"
 authors = ["Jan-Erik Rediger <janerik@fnordig.de>"]
+description = "mdbook preprocessor to add mermaid support"
+license = "MPL-2.0"
+homepage = "https://github.com/badboy/mdbook-mermaid"
+repository = "https://github.com/badboy/mdbook-mermaid"
 
 [dependencies]
 mdbook = "0.3.0"
