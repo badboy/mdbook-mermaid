@@ -28,8 +28,8 @@ install:
 test_script:
   # we don't run the "test phase" when doing deploys
   - if [%APPVEYOR_REPO_TAG%]==[false] (
+      cargo test --target %TARGET% &&
       cargo build --target %TARGET% &&
-      cargo build --target %TARGET% --release
     )
 
 before_deploy:
