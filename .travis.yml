@@ -1,15 +1,64 @@
-language: rust
-sudo: false
+# Based on the "trust" template v0.1.2
+# https://github.com/japaric/trust/tree/v0.1.2
 
-rust:
-  - stable
-  - beta
-  - nightly
+dist: trusty
+language: rust
+services: docker
+sudo: required
+
+env:
+  global:
+    - CRATE_NAME=mdbook-mermaid
+
+matrix:
+  include:
+    # Linux
+    - env: TARGET=i686-unknown-linux-gnu
+    - env: TARGET=x86_64-unknown-linux-gnu
+
+    # OSX
+    - env: TARGET=i686-apple-darwin
+      os: osx
+    - env: TARGET=x86_64-apple-darwin
+      os: osx
+
+before_install:
+  - set -e
+  - rustup self update
+
+install:
+  - sh ci/install.sh
+  - source ~/.cargo/env || true
 
 script:
-  - |
-      cargo build &&
-      cargo test
+  - bash ci/script.sh
+
+after_script: set +e
+
+before_deploy:
+  - sh ci/before_deploy.sh
+
+deploy:
+  api_key:
+    secure: "YdR5xnlg0+hNlY7wEOKjgf1uLzEU0HQAIj3B6yMJU2y8ldPSrU6A7VXzgFAARRBUy4nLfJMuQ0mwpYSJN132t42MGpkWr/aTBOCPHWl9Na9lTvuE/9su4D0WI3FTqYWejHfWDZWPVQNu5iwPhDQLGXA5eLf4ageEyT2TRDYUTdErWjNGoeF46nbSRaqRBeFFtbmTc7J7vqZ8QAyQozRukt9GX6hpYi5tGGUP+wqSl5j19G7LobhkUKndq9R3Vg5Es3Lc2cOda7BE9j+qH18NVCHqH3LgAWYsg1sZggImM1v+7kVp4FuiEHQfdhO1u1AUGuR6YJdue8HuNzPDfE1PWjPDQDbjALdOEqMTckVn8X6rAcRiaMLD/JtH1yx1039SaHgEas7333vi3iI4b4WoyxMHVJfBIHVE4nAbyxjn+wA8vn4mm5wghs3CWBaLp2TZj+M8Wmk2ps9IXRBsBs39OkvErDOKydl/ZhAxDXh0dH4z4v/c9Wsqb2xHJglM06fJzv39Ip3dfIepdME17BRnttjWSvK6xI+hWqX1v+F2j/LJGUeS4yxFNSPKUSoOYdkFUrR+kZURelQxR+c18vcdM7AtptwHlRLBwdZv6FFn2SZEFeXEgbdKP/iziNyNkZqhOoDeM11S9wRlVMeVoLg9QFTdV6pMto7rs/sguGx1lDk="
+  file_glob: true
+  file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
+  on:
+    condition: $TRAVIS_RUST_VERSION = stable
+    tags: true
+  provider: releases
+  skip_cleanup: true
+
+cache: cargo
+before_cache:
+  # Travis can't cache files that are not readable by "others"
+  - chmod -R a+r $HOME/.cargo
+
+branches:
+  only:
+    # release tags
+    - /^\d+\.\d+\.\d+.*$/
+    - master
 
 notifications:
   email: false
