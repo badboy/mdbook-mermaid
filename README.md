@@ -35,7 +35,7 @@ cargo install mdbook-mermaid
 Add the following to your `book.toml`
 
 ```toml
-[preprocessor.toc]
+[preprocessor.mermaid]
 command = "mdbook-mermaid"
 renderer = ["html"]
 
