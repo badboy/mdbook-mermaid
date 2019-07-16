@@ -2,8 +2,8 @@ extern crate mdbook;
 extern crate pulldown_cmark;
 extern crate pulldown_cmark_to_cmark;
 
-use mdbook::errors::{Error, Result};
 use mdbook::book::{Book, BookItem, Chapter};
+use mdbook::errors::{Error, Result};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use pulldown_cmark::{Event, Parser, Tag};
 use pulldown_cmark_to_cmark::fmt::cmark;
@@ -58,12 +58,15 @@ fn add_mermaid(content: &str) -> Result<String> {
 
         match e {
             Event::End(Tag::CodeBlock(code)) => {
-                assert_eq!("mermaid", &*code, "After an opening mermaid code block we expect it to close again");
+                assert_eq!(
+                    "mermaid", &*code,
+                    "After an opening mermaid code block we expect it to close again"
+                );
                 in_mermaid_block = false;
 
                 let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
                 return Some(Event::Text(mermaid_code.into()));
-            },
+            }
             Event::Text(code) => {
                 mermaid_content.push_str(&code);
             }

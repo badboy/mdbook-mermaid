@@ -18,7 +18,8 @@ pub fn make_app() -> App<'static, 'static> {
         .subcommand(
             SubCommand::with_name("supports")
                 .arg(Arg::with_name("renderer").required(true))
-                .about("Check whether a renderer is supported by this preprocessor"))
+                .about("Check whether a renderer is supported by this preprocessor"),
+        )
 }
 
 fn main() {
