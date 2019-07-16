@@ -3,7 +3,7 @@ extern crate mdbook;
 extern crate mdbook_mermaid;
 extern crate serde_json;
 
-use clap::{App, Arg, ArgMatches, SubCommand};
+use clap::{crate_version, App, Arg, ArgMatches, SubCommand};
 use mdbook::errors::Error;
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor};
 use mdbook_mermaid::Mermaid;
@@ -13,6 +13,7 @@ use std::process;
 
 pub fn make_app() -> App<'static, 'static> {
     App::new("mdbook-mermaid")
+        .version(crate_version!())
         .about("mdbook preprocessor to add mermaid support")
         .subcommand(
             SubCommand::with_name("supports")
