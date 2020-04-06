@@ -1,8 +1,3 @@
-extern crate clap;
-extern crate mdbook;
-extern crate mdbook_mermaid;
-extern crate serde_json;
-
 use clap::{crate_version, App, Arg, ArgMatches, SubCommand};
 use mdbook::errors::Error;
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor};
