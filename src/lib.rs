@@ -65,7 +65,7 @@ fn add_mermaid(content: &str) -> Result<String> {
                 in_mermaid_block = false;
 
                 let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
-                return Some(Event::Text(mermaid_code.into()));
+                return Some(Event::Html(mermaid_code.into()));
             }
             Event::Text(code) => {
                 mermaid_content.push_str(&code);
