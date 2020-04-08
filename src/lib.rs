@@ -1,7 +1,7 @@
 use mdbook::book::{Book, BookItem, Chapter};
 use mdbook::errors::{Error, Result};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use pulldown_cmark::{Event, Parser, Tag};
+use pulldown_cmark::{Event, Parser, Tag, Options};
 use pulldown_cmark_to_cmark::fmt::cmark;
 
 pub struct Mermaid;
@@ -37,7 +37,14 @@ fn add_mermaid(content: &str) -> Result<String> {
     let mut buf = String::with_capacity(content.len());
     let mut mermaid_content = String::new();
     let mut in_mermaid_block = false;
-    let events = Parser::new(content).map(|e| {
+
+    let mut opts = Options::empty();
+    opts.insert(Options::ENABLE_TABLES);
+    opts.insert(Options::ENABLE_FOOTNOTES);
+    opts.insert(Options::ENABLE_STRIKETHROUGH);
+    opts.insert(Options::ENABLE_TASKLISTS);
+
+    let events = Parser::new_ext(content, opts).map(|e| {
         if let Event::Start(Tag::CodeBlock(code)) = e.clone() {
             if &*code == "mermaid" {
                 in_mermaid_block = true;
@@ -106,6 +113,29 @@ A --> B
 </pre>
 
 Text"#;
+
+        assert_eq!(expected, add_mermaid(content).unwrap());
+    }
+
+
+    #[test]
+    fn leaves_tables_untouched() {
+        // Regression test.
+        // Previously we forgot to enable the same markdwon extensions as mdbook itself.
+
+        let content = r#"# Heading
+
+| Head 1 | Head 2 |
+|--------|--------|
+| Row 1  | Row 2  |
+"#;
+
+        // Markdown roundtripping removes some insignificant whitespace
+        let expected = r#"# Heading
+
+|Head 1|Head 2|
+|------|------|
+|Row 1|Row 2|"#;
 
         assert_eq!(expected, add_mermaid(content).unwrap());
     }
