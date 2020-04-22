@@ -1,8 +1,8 @@
 use mdbook::book::{Book, BookItem, Chapter};
 use mdbook::errors::{Error, Result};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use pulldown_cmark::{Event, Parser, Tag, Options};
-use pulldown_cmark_to_cmark::fmt::cmark;
+use pulldown_cmark::{CodeBlockKind::*, Event, Options, Parser, Tag};
+use pulldown_cmark_to_cmark::cmark;
 
 pub struct Mermaid;
 
@@ -45,7 +45,7 @@ fn add_mermaid(content: &str) -> Result<String> {
     opts.insert(Options::ENABLE_TASKLISTS);
 
     let events = Parser::new_ext(content, opts).map(|e| {
-        if let Event::Start(Tag::CodeBlock(code)) = e.clone() {
+        if let Event::Start(Tag::CodeBlock(Fenced(code))) = e.clone() {
             if &*code == "mermaid" {
                 in_mermaid_block = true;
                 mermaid_content.clear();
@@ -60,7 +60,7 @@ fn add_mermaid(content: &str) -> Result<String> {
         }
 
         match e {
-            Event::End(Tag::CodeBlock(code)) => {
+            Event::End(Tag::CodeBlock(Fenced(code))) => {
                 assert_eq!(
                     "mermaid", &*code,
                     "After an opening mermaid code block we expect it to close again"
@@ -112,11 +112,11 @@ Text
 A --> B
 </pre>
 
+
 Text"#;
 
         assert_eq!(expected, add_mermaid(content).unwrap());
     }
-
 
     #[test]
     fn leaves_tables_untouched() {
@@ -136,6 +136,33 @@ Text"#;
 |Head 1|Head 2|
 |------|------|
 |Row 1|Row 2|"#;
+
+        assert_eq!(expected, add_mermaid(content).unwrap());
+    }
+
+    #[test]
+    fn leaves_html_untouched() {
+        // Regression test.
+        // Don't remove important newlines for syntax nested inside HTML
+
+        let content = r#"# Heading
+
+<del>
+
+*foo*
+
+</del>
+"#;
+
+        // Markdown roundtripping removes some insignificant whitespace
+        let expected = r#"# Heading
+
+<del>
+
+*foo*
+
+</del>
+"#;
 
         assert_eq!(expected, add_mermaid(content).unwrap());
     }
