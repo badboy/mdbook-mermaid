@@ -44,7 +44,7 @@ additional-css = ["mermaid.css"]
 additional-js = ["mermaid.min.js", "mermaid-init.js"]
 ```
 
-Copy the files (`mermaid.css`, `mermaid.min.js`, `mermaid-init.js`) from the [`assets/`] (assets) directory into your source directory.
+Copy the files (`mermaid.css`, `mermaid.min.js`, `mermaid-init.js`) from the [`assets/`](assets) directory into your source directory.
 
 Finally, build your book:
 
