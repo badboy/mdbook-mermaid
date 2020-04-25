@@ -2,7 +2,7 @@ use clap::{crate_version, App, Arg, ArgMatches, SubCommand};
 use mdbook::errors::Error;
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor};
 use mdbook_mermaid::Mermaid;
-use toml_edit::{Array, Document, Item, Table, Value};
+use toml_edit::{value, Array, Document, Item, Table, Value};
 
 use std::{
     fs::{self, File},
@@ -41,7 +41,7 @@ pub fn make_app() -> App<'static, 'static> {
 }
 
 fn main() {
-    env_logger::init();
+    env_logger::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
     let matches = make_app().get_matches();
 
@@ -103,40 +103,68 @@ fn handle_install(sub_args: &ArgMatches) -> ! {
         .parse::<Document>()
         .expect("configuration is not valid TOML");
 
-    log::info!("Adding additional files to configuration (if necessary)");
-    if add_additional_files(&mut doc) {
+    let has_pre = has_preprocessor(&mut doc);
+    if !has_pre {
+        log::info!("Adding preprocessor configuration");
+        add_preprocessor(&mut doc);
+    }
+
+    if !has_pre || add_additional_files(&mut doc) {
         log::info!("Saving changed configuration to {}", config.display());
         let toml = doc.to_string_in_original_order();
         let mut file = File::create(config).expect("can't open configuration file for writing.");
-        file.write_all(toml.as_bytes()).expect("can't write configuration");
+        file.write_all(toml.as_bytes())
+            .expect("can't write configuration");
     }
 
-    log::info!("Writing additional files to project directory at {}", proj_dir.display());
+    let mut printed = false;
     for (name, content) in MERMAID_FILES {
         let filepath = proj_dir.join(name);
         if filepath.exists() {
-            log::debug!("'{}' already exists (Path: {}). Skipping.", name, filepath.display());
+            log::debug!(
+                "'{}' already exists (Path: {}). Skipping.",
+                name,
+                filepath.display()
+            );
         } else {
+            if !printed {
+                printed = true;
+                log::info!(
+                    "Writing additional files to project directory at {}",
+                    proj_dir.display()
+                );
+            }
             log::debug!("Writing content for '{}' into {}", name, filepath.display());
             let mut file = File::create(filepath).expect("can't open file for writing");
-            file.write_all(content).expect("can't write content to file");
+            file.write_all(content)
+                .expect("can't write content to file");
         }
-
     }
 
-    log::info!("mermaid is active. You can start using it in your book.");
+    log::info!("Files & configuration for mdbook-mermaid are installed. You can start using it in your book.");
+    let codeblock = r#"```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```"#;
+    log::info!("Add a code block like:\n{}", codeblock);
 
     process::exit(0);
 }
 
 fn add_additional_files(doc: &mut Document) -> bool {
     let mut changed = false;
+    let mut printed = true;
 
     let file = "mermaid.css";
     let additional_css = additional(doc, "css");
     if has_file(&additional_css, file) {
         log::debug!("'{}' already in 'additional-css'. Skipping", file)
     } else {
+        printed = true;
+        log::info!("Adding additional files to configuration");
         log::debug!("Adding '{}' to 'additional-css'", file);
         insert_additional(doc, "css", file);
         changed = true;
@@ -147,6 +175,10 @@ fn add_additional_files(doc: &mut Document) -> bool {
     if has_file(&additional_js, file) {
         log::debug!("'{}' already in 'additional-js'. Skipping", file)
     } else {
+        if !printed {
+            printed = true;
+            log::info!("Adding additional files to configuration");
+        }
         log::debug!("Adding '{}' to 'additional-js'", file);
         insert_additional(doc, "js", file);
         changed = true;
@@ -157,6 +189,9 @@ fn add_additional_files(doc: &mut Document) -> bool {
     if has_file(&additional_js, file) {
         log::debug!("'{}' already in 'additional-js'. Skipping", file)
     } else {
+        if !printed {
+            log::info!("Adding additional files to configuration");
+        }
         log::debug!("Adding '{}' to 'additional-js'", file);
         insert_additional(doc, "js", file);
         changed = true;
@@ -174,6 +209,24 @@ fn additional<'a>(doc: &'a mut Document, additional_type: &str) -> Option<&'a mu
         .as_table_mut()?
         .entry(&format!("additional-{}", additional_type));
     item.as_array_mut()
+}
+
+fn has_preprocessor(doc: &mut Document) -> bool {
+    matches!(doc["preprocessor"]["mermaid"], Item::Table(_))
+}
+
+fn add_preprocessor(doc: &mut Document) {
+    let doc = doc.as_table_mut();
+
+    let empty_table = Item::Table(Table::default());
+
+    let item = doc.entry("preprocessor").or_insert(empty_table.clone());
+    let item = item
+        .as_table_mut()
+        .unwrap()
+        .entry("mermaid")
+        .or_insert(empty_table.clone());
+    item["command"] = value("mdbook-mermaid");
 }
 
 fn has_file(elem: &Option<&mut Array>, file: &str) -> bool {
