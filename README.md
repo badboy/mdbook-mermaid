@@ -32,19 +32,28 @@ If you want to use only this preprocessor, install the tool:
 cargo install mdbook-mermaid
 ```
 
-Add the following to your `book.toml`
+Then let `mdbook-mermaid` add the required files and configuration:
+
+```
+mdbook-mermaid install path/to/your/book
+```
+
+
+This will add the following configuration to your `book.toml`:
 
 ```toml
 [preprocessor.mermaid]
 command = "mdbook-mermaid"
-renderer = ["html"]
 
 [output.html]
 additional-css = ["mermaid.css"]
 additional-js = ["mermaid.min.js", "mermaid-init.js"]
 ```
 
-Copy the files (`mermaid.css`, `mermaid.min.js`, `mermaid-init.js`) from the [`assets/`](assets) directory into your source directory.
+It will skip any unnecessary changes and detect if `mdbook-mermaid` was already configured.
+
+Additionally it copies the files `mermaid.css`, `mermaid.min.js` and  `mermaid-init.js` into your book's directory.
+You find these files in the [`src/bin/assets`](src/bin/assets) directory.
 
 Finally, build your book:
 
