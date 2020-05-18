@@ -94,6 +94,8 @@ impl Mermaid {
 
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     use super::add_mermaid;
 
     #[test]
