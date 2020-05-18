@@ -2,7 +2,7 @@ use mdbook::book::{Book, BookItem, Chapter};
 use mdbook::errors::{Error, Result};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use pulldown_cmark::{CodeBlockKind::*, Event, Options, Parser, Tag};
-use pulldown_cmark_to_cmark::cmark;
+use pulldown_cmark_to_cmark::{cmark_with_options, Options as COptions};
 
 pub struct Mermaid;
 
@@ -79,7 +79,9 @@ fn add_mermaid(content: &str) -> Result<String> {
         None
     });
     let events = events.filter_map(|e| e);
-    cmark(events, &mut buf, None)
+    let mut opts = COptions::default();
+    opts.newlines_after_codeblock = 1;
+    cmark_with_options(events, &mut buf, None, opts)
         .map(|_| buf)
         .map_err(|err| Error::from(format!("Markdown serialization failed: {}", err)))
 }
@@ -163,6 +165,32 @@ Text"#;
 
 </del>
 "#;
+
+        assert_eq!(expected, add_mermaid(content).unwrap());
+    }
+
+    #[test]
+    fn html_in_list() {
+        // Regression test.
+        // Don't remove important newlines for syntax nested inside HTML
+
+        let content = r#"# Heading
+
+1. paragraph 1
+   ```
+   code 1
+   ```
+2. paragraph 2
+"#;
+
+        // Markdown roundtripping removes some insignificant whitespace
+        let expected = r#"# Heading
+
+1. paragraph 1
+   ````
+   code 1
+   ````
+1. paragraph 2"#;
 
         assert_eq!(expected, add_mermaid(content).unwrap());
     }

@@ -688,7 +688,7 @@ dependencies = [
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "mdbook 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "pulldown-cmark 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "pulldown-cmark-to-cmark 4.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pulldown-cmark-to-cmark 4.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.51 (registry+https://github.com/rust-lang/crates.io-index)",
  "toml_edit 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -1018,7 +1018,7 @@ dependencies = [
 
 [[package]]
 name = "pulldown-cmark-to-cmark"
-version = "4.0.0"
+version = "4.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "pulldown-cmark 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1844,7 +1844,7 @@ dependencies = [
 "checksum proc-macro2 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)" = "df246d292ff63439fea9bc8c0a270bed0e390d5ebd4db4ba15aba81111b5abe3"
 "checksum pulldown-cmark 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)" = "1c205cc82214f3594e2d50686730314f817c67ffa80fe800cf0db78c3c2b9d9e"
 "checksum pulldown-cmark 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2c2d7fd131800e0d63df52aff46201acaab70b431a4a1ec6f0343fe8e64f35a4"
-"checksum pulldown-cmark-to-cmark 4.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "9f80851bae4714721298e6d05a0e1454055985ce5d82c4d01bf6905f8c5a382a"
+"checksum pulldown-cmark-to-cmark 4.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3b4d8d4a8ba6196543f202112fc5d77d36bf082bae5823c9707cf48f20bc436f"
 "checksum quick-error 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
 "checksum quote 0.6.13 (registry+https://github.com/rust-lang/crates.io-index)" = "6ce23b6b870e8f94f81fb0a363d65d86675884b34a09043c81e5562f11c1f8e1"
 "checksum quote 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "2bdc6c187c65bca4260c9011c9e3132efe4909da44726bad24cf7572ae338d7f"
