@@ -33,6 +33,20 @@ impl Preprocessor for Mermaid {
     }
 }
 
+fn escape_html(s: &str) -> String {
+    let mut output = String::new();
+    for c in s.chars() {
+        match c {
+            '<' => output.push_str("&lt;"),
+            '>' => output.push_str("&gt;"),
+            '"' => output.push_str("&quot;"),
+            '&' => output.push_str("&amp;"),
+            _ => output.push(c),
+        }
+    }
+    output
+}
+
 fn add_mermaid(content: &str) -> Result<String> {
     let mut buf = String::with_capacity(content.len());
     let mut mermaid_content = String::new();
@@ -67,6 +81,7 @@ fn add_mermaid(content: &str) -> Result<String> {
                 );
                 in_mermaid_block = false;
 
+                let mermaid_content = escape_html(&mermaid_content);
                 let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
                 return Some(Event::Html(mermaid_code.into()));
             }
@@ -113,7 +128,7 @@ Text
         let expected = r#"# Chapter
 
 <pre class="mermaid">graph TD
-A --> B
+A --&gt; B
 </pre>
 
 
@@ -193,6 +208,31 @@ Text"#;
    code 1
    ````
 1. paragraph 2"#;
+
+        assert_eq!(expected, add_mermaid(content).unwrap());
+    }
+
+    #[test]
+    fn escape_in_mermaid_block() {
+        let content = r#"
+```mermaid
+classDiagram
+    class PingUploader {
+        <<interface>>
+        +Upload() UploadResult
+    }
+```
+
+"#;
+
+        let expected = r#"<pre class="mermaid">classDiagram
+    class PingUploader {
+        &lt;&lt;interface&gt;&gt;
+        +Upload() UploadResult
+    }
+</pre>
+
+"#;
 
         assert_eq!(expected, add_mermaid(content).unwrap());
     }
