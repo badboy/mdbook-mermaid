@@ -718,7 +718,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-mermaid"
-version = "0.6.1-alpha.0"
+version = "0.6.1"
 dependencies = [
  "clap 2.33.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
