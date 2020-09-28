@@ -33,7 +33,7 @@ test_script:
     )
 
 before_deploy:
-  - cargo rustc --target %TARGET% --release --bin mdbook-mermaid -- -C lto
+  - cargo rustc --target %TARGET% --release --bin mdbook-mermaid
   - ps: ci\before_deploy.ps1
 
 deploy:
