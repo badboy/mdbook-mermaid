@@ -13,11 +13,9 @@ use std::{
 
 const MERMAID_JS: &[u8] = include_bytes!("assets/mermaid.min.js");
 const MERMAID_INIT_JS: &[u8] = include_bytes!("assets/mermaid-init.js");
-const MERMAID_CSS: &[u8] = include_bytes!("assets/mermaid.css");
 const MERMAID_FILES: &[(&str, &[u8])] = &[
     ("mermaid.min.js", MERMAID_JS),
     ("mermaid-init.js", MERMAID_INIT_JS),
-    ("mermaid.css", MERMAID_CSS),
 ];
 
 pub fn make_app() -> App<'static, 'static> {
@@ -156,29 +154,15 @@ graph TD;
 
 fn add_additional_files(doc: &mut Document) -> bool {
     let mut changed = false;
-    let mut printed = true;
-
-    let file = "mermaid.css";
-    let additional_css = additional(doc, "css");
-    if has_file(&additional_css, file) {
-        log::debug!("'{}' already in 'additional-css'. Skipping", file)
-    } else {
-        printed = true;
-        log::info!("Adding additional files to configuration");
-        log::debug!("Adding '{}' to 'additional-css'", file);
-        insert_additional(doc, "css", file);
-        changed = true;
-    }
+    let mut printed = false;
 
     let file = "mermaid.min.js";
     let additional_js = additional(doc, "js");
     if has_file(&additional_js, file) {
         log::debug!("'{}' already in 'additional-js'. Skipping", file)
     } else {
-        if !printed {
-            printed = true;
-            log::info!("Adding additional files to configuration");
-        }
+        printed = true;
+        log::info!("Adding additional files to configuration");
         log::debug!("Adding '{}' to 'additional-js'", file);
         insert_additional(doc, "js", file);
         changed = true;

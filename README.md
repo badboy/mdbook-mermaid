@@ -46,14 +46,16 @@ This will add the following configuration to your `book.toml`:
 command = "mdbook-mermaid"
 
 [output.html]
-additional-css = ["mermaid.css"]
 additional-js = ["mermaid.min.js", "mermaid-init.js"]
 ```
 
 It will skip any unnecessary changes and detect if `mdbook-mermaid` was already configured.
 
-Additionally it copies the files `mermaid.css`, `mermaid.min.js` and  `mermaid-init.js` into your book's directory.
+Additionally it copies the files `mermaid.min.js` and  `mermaid-init.js` into your book's directory.
 You find these files in the [`src/bin/assets`](src/bin/assets) directory.
+You can modify `mermaid-init.js` to configure Mermaid, see the [Mermaid documentation] for all options.
+
+[Mermaid documentation]: https://mermaid-js.github.io/mermaid/#/Setup?id=mermaidapi-configuration-defaults
 
 Finally, build your book:
 
@@ -64,7 +66,7 @@ mdbook path/to/book
 ## License
 
 MPL. See [LICENSE](LICENSE).  
-Copyright (c) 2018-2020 Jan-Erik Rediger <janerik@fnordig.de>
+Copyright (c) 2018-2021 Jan-Erik Rediger <janerik@fnordig.de>
 
 Mermaid is [MIT licensed](https://github.com/knsv/mermaid/blob/master/LICENSE).
-The bundled assets (`mermaid.css`, `mermaid.min.js`) are MIT licensed.
+The bundled assets (`mermaid.min.js`) are MIT licensed.
