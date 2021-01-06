@@ -801,7 +801,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-mermaid"
-version = "0.6.2-alpha.0"
+version = "0.7.0"
 dependencies = [
  "clap",
  "env_logger",
