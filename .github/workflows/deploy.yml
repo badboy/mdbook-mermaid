@@ -79,7 +79,7 @@ jobs:
           mkdir target/stage
           cd target/${{ matrix.target }}/release
           strip ${{ env.CRATE_NAME }}.exe
-          7z a ../../stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.target }} ${{ env.CRATE_NAME }}.exe
+          7z a ../../stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }} ${{ env.CRATE_NAME }}.exe
           cd -
 
       - name: Post Setup | Prepare artifacts [-nix]
