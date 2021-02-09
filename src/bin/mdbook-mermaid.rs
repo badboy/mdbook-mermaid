@@ -107,7 +107,9 @@ fn handle_install(sub_args: &ArgMatches) -> ! {
         add_preprocessor(&mut doc);
     }
 
-    if !has_pre || add_additional_files(&mut doc) {
+    let added_files = add_additional_files(&mut doc);
+
+    if !has_pre || added_files {
         log::info!("Saving changed configuration to {}", config.display());
         let toml = doc.to_string_in_original_order();
         let mut file = File::create(config).expect("can't open configuration file for writing.");
