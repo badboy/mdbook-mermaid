@@ -94,8 +94,10 @@ fn add_mermaid(content: &str) -> Result<String> {
         None
     });
     let events = events.filter_map(|e| e);
-    let mut opts = COptions::default();
-    opts.newlines_after_codeblock = 1;
+    let opts = COptions {
+        newlines_after_codeblock: 1,
+        ..Default::default()
+    };
     cmark_with_options(events, &mut buf, None, opts)
         .map(|_| buf)
         .map_err(|err| Error::msg(format!("Markdown serialization failed: {}", err)))
