@@ -26,8 +26,14 @@ macro_rules! test_install {
             $msg
         );
 
-        assert!(tmp.path().join("mermaid.min.js").exists(), "Failed to copy mermaid.min.js");
-        assert!(tmp.path().join("mermaid-init.js").exists(), "Failed to copy mermaid.min.js");
+        assert!(
+            tmp.path().join("mermaid.min.js").exists(),
+            "Failed to copy mermaid.min.js"
+        );
+        assert!(
+            tmp.path().join("mermaid-init.js").exists(),
+            "Failed to copy mermaid.min.js"
+        );
     };
 }
 
