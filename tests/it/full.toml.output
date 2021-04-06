@@ -1,0 +1,9 @@
+[book]
+title = "mdbook-mermaid fully configured"
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+renderer = ["html"]
+
+[output.html]
+additional-js =["mermaid.min.js", "mermaid-init.js"]

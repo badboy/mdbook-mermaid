@@ -1,0 +1,8 @@
+[book]
+title = "All mermaid config options missing"
+[preprocessor]
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+[output]
+[output.html]
+additional-js =["mermaid.min.js", "mermaid-init.js"]
