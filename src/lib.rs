@@ -93,7 +93,7 @@ fn add_mermaid(content: &str) -> Result<String> {
 
         None
     });
-    let events = events.filter_map(|e| e);
+    let events = events.flatten();
     let opts = COptions {
         newlines_after_codeblock: 1,
         ..Default::default()
