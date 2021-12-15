@@ -1,8 +1,7 @@
 use mdbook::book::{Book, BookItem, Chapter};
-use mdbook::errors::{Error, Result};
+use mdbook::errors::{Result};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use pulldown_cmark::{CodeBlockKind::*, Event, Options, Parser, Tag};
-use pulldown_cmark_to_cmark::{cmark_with_options, Options as COptions};
+use pulldown_cmark::{CodeBlockKind::*, Event, Parser, Tag};
 
 pub struct Mermaid;
 
@@ -49,16 +48,9 @@ fn escape_html(s: &str) -> String {
 
 fn add_mermaid(content: &str) -> Result<String> {
     let mut buf = String::with_capacity(content.len());
-    let mut mermaid_content = String::new();
     let mut in_mermaid_block = false;
 
-    let mut opts = Options::empty();
-    opts.insert(Options::ENABLE_TABLES);
-    opts.insert(Options::ENABLE_FOOTNOTES);
-    opts.insert(Options::ENABLE_STRIKETHROUGH);
-    opts.insert(Options::ENABLE_TASKLISTS);
-
-    let parser = Parser::new_ext(content, opts);
+    let parser = Parser::new(content);
     /* We only insert the top-level tags i.e when depth = 0 */
     let mut depth = 0;
 
@@ -99,6 +91,13 @@ fn add_mermaid(content: &str) -> Result<String> {
 
             Event::End(_) => {
                 depth -= 1;
+                if !in_mermaid_block && depth == 0{
+                    buf.push_str("\n");
+                }
+            }
+
+            Event::Html(_) => {
+                buf.push_str(&content[range]);
             }
             
             _ => {}
