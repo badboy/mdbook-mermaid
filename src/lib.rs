@@ -58,49 +58,53 @@ fn add_mermaid(content: &str) -> Result<String> {
     opts.insert(Options::ENABLE_STRIKETHROUGH);
     opts.insert(Options::ENABLE_TASKLISTS);
 
-    let events = Parser::new_ext(content, opts).map(|e| {
-        if let Event::Start(Tag::CodeBlock(Fenced(code))) = e.clone() {
-            if &*code == "mermaid" {
-                in_mermaid_block = true;
-                mermaid_content.clear();
-                return None;
-            } else {
-                return Some(e);
+    let parser = Parser::new_ext(content, opts);
+    /* We only insert the top-level tags i.e when depth = 0 */
+    let mut depth = 0;
+
+    for (event, range) in parser.into_offset_iter() {
+        match event {
+            Event::Start(Tag::CodeBlock(Fenced(code))) => {
+                if &*code == "mermaid" {
+                    in_mermaid_block=true;
+                    buf.push_str("<pre class=\"mermaid\">");
+                } else {
+                    buf.push_str(&content[range]);
+                }
             }
-        }
 
-        if !in_mermaid_block {
-            return Some(e);
-        }
-
-        match e {
             Event::End(Tag::CodeBlock(Fenced(code))) => {
-                assert_eq!(
-                    "mermaid", &*code,
-                    "After an opening mermaid code block we expect it to close again"
-                );
-                in_mermaid_block = false;
-
-                let mermaid_content = escape_html(&mermaid_content);
-                let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
-                return Some(Event::Html(mermaid_code.into()));
+                if in_mermaid_block{
+                    assert_eq!(
+                        "mermaid", &*code,
+                        "After an opening mermaid code block we expect it to close again"
+                    );
+                    in_mermaid_block = false;
+                    buf.push_str("</pre>\n\n");
+                }
             }
+
             Event::Text(code) => {
-                mermaid_content.push_str(&code);
+                if in_mermaid_block{
+                    buf.push_str(&escape_html(&code));
+                }
             }
-            _ => return Some(e),
-        }
 
-        None
-    });
-    let events = events.flatten();
-    let opts = COptions {
-        newlines_after_codeblock: 1,
-        ..Default::default()
-    };
-    cmark_with_options(events, &mut buf, None, opts)
-        .map(|_| buf)
-        .map_err(|err| Error::msg(format!("Markdown serialization failed: {}", err)))
+            Event::Start(_) => {
+                if !in_mermaid_block && depth == 0{
+                    buf.push_str(&content[range]);
+                }
+                depth += 1;
+            }
+
+            Event::End(_) => {
+                depth -= 1;
+            }
+            
+            _ => {}
+        }
+    }
+    Ok(buf)
 }
 
 impl Mermaid {
