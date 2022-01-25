@@ -1,8 +1,7 @@
 use mdbook::book::{Book, BookItem, Chapter};
-use mdbook::errors::{Error, Result};
+use mdbook::errors::Result;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use pulldown_cmark::{CodeBlockKind::*, Event, Options, Parser, Tag};
-use pulldown_cmark_to_cmark::{cmark_with_options, Options as COptions};
 
 pub struct Mermaid;
 
@@ -48,7 +47,6 @@ fn escape_html(s: &str) -> String {
 }
 
 fn add_mermaid(content: &str) -> Result<String> {
-    let mut buf = String::with_capacity(content.len());
     let mut mermaid_content = String::new();
     let mut in_mermaid_block = false;
 
@@ -58,49 +56,49 @@ fn add_mermaid(content: &str) -> Result<String> {
     opts.insert(Options::ENABLE_STRIKETHROUGH);
     opts.insert(Options::ENABLE_TASKLISTS);
 
-    let events = Parser::new_ext(content, opts).map(|e| {
+    let mut mermaid_start = 0..0;
+
+    let mut mermaid_blocks = vec![];
+
+    let events = Parser::new_ext(content, opts);
+    for (e, span) in events.into_offset_iter() {
         if let Event::Start(Tag::CodeBlock(Fenced(code))) = e.clone() {
+            log::debug!("e={:?}, span={:?}", e, span);
             if &*code == "mermaid" {
+                mermaid_start = span;
                 in_mermaid_block = true;
                 mermaid_content.clear();
-                return None;
-            } else {
-                return Some(e);
             }
+            continue;
         }
 
         if !in_mermaid_block {
-            return Some(e);
+            continue;
         }
 
-        match e {
-            Event::End(Tag::CodeBlock(Fenced(code))) => {
-                assert_eq!(
-                    "mermaid", &*code,
-                    "After an opening mermaid code block we expect it to close again"
-                );
-                in_mermaid_block = false;
+        if let Event::End(Tag::CodeBlock(Fenced(code))) = e {
+            assert_eq!(
+                "mermaid", &*code,
+                "After an opening mermaid code block we expect it to close again"
+            );
+            in_mermaid_block = false;
+            let pre = "```mermaid\n";
+            let post = "```";
 
-                let mermaid_content = escape_html(&mermaid_content);
-                let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
-                return Some(Event::Html(mermaid_code.into()));
-            }
-            Event::Text(code) => {
-                mermaid_content.push_str(&code);
-            }
-            _ => return Some(e),
+            let mermaid_content = &content[mermaid_start.start + pre.len()..span.end - post.len()];
+            let mermaid_content = escape_html(mermaid_content);
+            let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
+            mermaid_blocks.push((mermaid_start.start..span.end, mermaid_code.clone()));
         }
+    }
 
-        None
-    });
-    let events = events.flatten();
-    let opts = COptions {
-        newlines_after_codeblock: 1,
-        ..Default::default()
-    };
-    cmark_with_options(events, &mut buf, None, opts)
-        .map(|_| buf)
-        .map_err(|err| Error::msg(format!("Markdown serialization failed: {}", err)))
+    let mut content = content.to_string();
+    for (span, block) in mermaid_blocks.iter().rev() {
+        let pre_content = &content[0..span.start];
+        let post_content = &content[span.end..];
+        content = format!("{}\n{}{}", pre_content, block, post_content);
+    }
+    Ok(content)
 }
 
 impl Mermaid {
@@ -129,12 +127,15 @@ Text
 
         let expected = r#"# Chapter
 
+
 <pre class="mermaid">graph TD
 A --&gt; B
 </pre>
 
 
-Text"#;
+
+Text
+"#;
 
         assert_eq!(expected, add_mermaid(content).unwrap());
     }
@@ -151,12 +152,12 @@ Text"#;
 | Row 1  | Row 2  |
 "#;
 
-        // Markdown roundtripping removes some insignificant whitespace
         let expected = r#"# Heading
 
-|Head 1|Head 2|
-|------|------|
-|Row 1|Row 2|"#;
+| Head 1 | Head 2 |
+|--------|--------|
+| Row 1  | Row 2  |
+"#;
 
         assert_eq!(expected, add_mermaid(content).unwrap());
     }
@@ -175,7 +176,6 @@ Text"#;
 </del>
 "#;
 
-        // Markdown roundtripping removes some insignificant whitespace
         let expected = r#"# Heading
 
 <del>
@@ -202,20 +202,21 @@ Text"#;
 2. paragraph 2
 "#;
 
-        // Markdown roundtripping removes some insignificant whitespace
         let expected = r#"# Heading
 
 1. paragraph 1
-   ````
+   ```
    code 1
-   ````
-1. paragraph 2"#;
+   ```
+2. paragraph 2
+"#;
 
         assert_eq!(expected, add_mermaid(content).unwrap());
     }
 
     #[test]
     fn escape_in_mermaid_block() {
+        env_logger::init();
         let content = r#"
 ```mermaid
 classDiagram
@@ -225,15 +226,21 @@ classDiagram
     }
 ```
 
+hello
 "#;
 
-        let expected = r#"<pre class="mermaid">classDiagram
+        let expected = r#"
+
+<pre class="mermaid">classDiagram
     class PingUploader {
         &lt;&lt;interface&gt;&gt;
         +Upload() UploadResult
     }
 </pre>
 
+
+
+hello
 "#;
 
         assert_eq!(expected, add_mermaid(content).unwrap());

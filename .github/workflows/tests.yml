@@ -23,12 +23,6 @@ jobs:
         toolchain: ${{ matrix.rust }}
         override: true
 
-    - name: check
-      uses: actions-rs/cargo@v1
-      with:
-        command: check
-        args: --all
-
     - name: tests
       uses: actions-rs/cargo@v1
       with:
