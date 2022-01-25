@@ -39,7 +39,7 @@ pub fn make_app() -> App<'static, 'static> {
 }
 
 fn main() {
-    env_logger::from_env(env_logger::Env::default().default_filter_or("info")).init();
+    env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
 
     let matches = make_app().get_matches();
 
@@ -109,7 +109,7 @@ fn handle_install(sub_args: &ArgMatches) -> ! {
 
     if !has_pre || added_files {
         log::info!("Saving changed configuration to {}", config.display());
-        let toml = doc.to_string_in_original_order();
+        let toml = doc.to_string();
         let mut file = File::create(config).expect("can't open configuration file for writing.");
         file.write_all(toml.as_bytes())
             .expect("can't write configuration");
@@ -187,16 +187,19 @@ fn add_additional_files(doc: &mut Document) -> bool {
 fn additional<'a>(doc: &'a mut Document, additional_type: &str) -> Option<&'a mut Array> {
     let doc = doc.as_table_mut();
 
-    let item = doc.entry("output");
-    let item = item.as_table_mut()?.entry("html");
+    let item = doc.get_mut("output")?;
+    let item = item.as_table_mut()?.get_mut("html")?;
     let item = item
         .as_table_mut()?
-        .entry(&format!("additional-{}", additional_type));
+        .get_mut(&format!("additional-{}", additional_type))?;
     item.as_array_mut()
 }
 
 fn has_preprocessor(doc: &mut Document) -> bool {
-    matches!(doc["preprocessor"]["mermaid"], Item::Table(_))
+    doc.get("preprocessor")
+        .and_then(|p| p.get("mermaid"))
+        .map(|m| matches!(m, Item::Table(_)))
+        .unwrap_or(false)
 }
 
 fn add_preprocessor(doc: &mut Document) {
