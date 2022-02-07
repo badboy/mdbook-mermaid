@@ -1,3 +1,9 @@
+# v0.10.0 (2022-02-07)
+
+[Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.9.0...v0.10.0)
+
+* Upgrade to mermaid v8.13.10
+
 # v0.9.0 (2022-01-26)
 
 [Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.8.3...v0.9.0)
