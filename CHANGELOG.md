@@ -1,8 +1,19 @@
+# v0.9.0 (2022-01-26)
+
+[Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.8.3...v0.9.0)
+
+* Avoid roundtripping through pulldown-cmark.
+  Should make the produced markdown much more consistent.
+
 # v0.8.3 (2021-06-11)
+
+[Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.8.2...v0.8.3)
 
 * Bump to mdbook v0.4.10
 
 # v0.8.2 (2021-06-11)
+
+[Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.8.1...v0.8.2)
 
 * Bump to mdbook v0.4.9
 
