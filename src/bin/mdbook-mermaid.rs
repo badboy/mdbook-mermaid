@@ -1,4 +1,4 @@
-use clap::{crate_version, App, Arg, ArgMatches, SubCommand};
+use clap::{crate_version, Arg, ArgMatches, Command};
 use mdbook::errors::Error;
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor};
 use mdbook_mermaid::Mermaid;
@@ -18,19 +18,19 @@ const MERMAID_FILES: &[(&str, &[u8])] = &[
     ("mermaid-init.js", MERMAID_INIT_JS),
 ];
 
-pub fn make_app() -> App<'static, 'static> {
-    App::new("mdbook-mermaid")
+pub fn make_app() -> Command<'static> {
+    Command::new("mdbook-mermaid")
         .version(crate_version!())
         .about("mdbook preprocessor to add mermaid support")
         .subcommand(
-            SubCommand::with_name("supports")
-                .arg(Arg::with_name("renderer").required(true))
+            Command::new("supports")
+                .arg(Arg::new("renderer").required(true))
                 .about("Check whether a renderer is supported by this preprocessor"),
         )
         .subcommand(
-            SubCommand::with_name("install")
+            Command::new("install")
                 .arg(
-                    Arg::with_name("dir")
+                    Arg::new("dir")
                     .default_value(".")
                     .help("Root directory for the book,\nshould contain the configuration file (`book.toml`)")
                     )
