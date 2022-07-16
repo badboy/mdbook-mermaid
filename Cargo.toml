@@ -1,6 +1,6 @@
 [package]
 name = "mdbook-mermaid"
-version = "0.11.0"
+version = "0.11.1"
 authors = ["Jan-Erik Rediger <janerik@fnordig.de>"]
 description = "mdbook preprocessor to add mermaid support"
 license = "MPL-2.0"
