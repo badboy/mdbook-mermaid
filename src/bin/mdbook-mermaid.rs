@@ -242,7 +242,7 @@ fn insert_additional(doc: &mut Document, additional_type: &str, file: &str) {
         .unwrap()
         .entry(&format!("additional-{}", additional_type))
         .or_insert(empty_array);
-    let _ = array
+    array
         .as_value_mut()
         .unwrap()
         .as_array_mut()
