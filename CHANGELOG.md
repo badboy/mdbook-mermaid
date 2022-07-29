@@ -1,3 +1,15 @@
+# v0.11.2 (2022-07-29)
+
+[Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.11.1...v0.11.2)
+
+* Upgrade to mermaid v9.1.3
+
+# v0.11.1 (2022-07-16)
+
+[Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.11.0...v0.11.1)
+
+* Reduce dependency tree by disabling default features of direct dependencies
+
 # v0.11.0 (2022-05-26)
 
 [Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.10.0...v0.11.0)
