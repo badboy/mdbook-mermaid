@@ -481,7 +481,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-mermaid"
-version = "0.11.2"
+version = "0.12.0"
 dependencies = [
  "assert_cmd",
  "clap",
