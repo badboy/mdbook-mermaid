@@ -1,6 +1,6 @@
-# Unreleased
+# v0.12.1 (2022-10-18)
 
-[Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.12.0...main)
+[Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.12.0...v0.12.1)
 
 * BUGFIX: Handle arbitrary code span starts
 
