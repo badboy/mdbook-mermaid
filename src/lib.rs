@@ -56,16 +56,15 @@ fn add_mermaid(content: &str) -> Result<String> {
     opts.insert(Options::ENABLE_STRIKETHROUGH);
     opts.insert(Options::ENABLE_TASKLISTS);
 
-    let mut mermaid_start = 0..0;
+    let mut code_span = 0..0;
 
     let mut mermaid_blocks = vec![];
 
     let events = Parser::new_ext(content, opts);
     for (e, span) in events.into_offset_iter() {
+        log::debug!("e={:?}, span={:?}", e, span);
         if let Event::Start(Tag::CodeBlock(Fenced(code))) = e.clone() {
-            log::debug!("e={:?}, span={:?}", e, span);
             if &*code == "mermaid" {
-                mermaid_start = span;
                 in_mermaid_block = true;
                 mermaid_content.clear();
             }
@@ -76,19 +75,23 @@ fn add_mermaid(content: &str) -> Result<String> {
             continue;
         }
 
+        // We're in the code block. The text is what we want.
+        if let Event::Text(_) = e {
+            code_span = span;
+            continue;
+        }
+
         if let Event::End(Tag::CodeBlock(Fenced(code))) = e {
             assert_eq!(
                 "mermaid", &*code,
                 "After an opening mermaid code block we expect it to close again"
             );
             in_mermaid_block = false;
-            let pre = "```mermaid\n";
-            let post = "```";
 
-            let mermaid_content = &content[mermaid_start.start + pre.len()..span.end - post.len()];
+            let mermaid_content = &content[code_span.clone()];
             let mermaid_content = escape_html(mermaid_content);
             let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
-            mermaid_blocks.push((mermaid_start.start..span.end, mermaid_code.clone()));
+            mermaid_blocks.push((span, mermaid_code));
         }
     }
 
@@ -216,7 +219,7 @@ Text
 
     #[test]
     fn escape_in_mermaid_block() {
-        env_logger::init();
+        let _ = env_logger::try_init();
         let content = r#"
 ```mermaid
 classDiagram
@@ -241,6 +244,34 @@ hello
 
 
 hello
+"#;
+
+        assert_eq!(expected, add_mermaid(content).unwrap());
+    }
+
+    #[test]
+    fn more_backticks() {
+        let _ = env_logger::try_init();
+        let content = r#"# Chapter
+
+````mermaid
+graph TD
+A --> B
+````
+
+Text
+"#;
+
+        let expected = r#"# Chapter
+
+
+<pre class="mermaid">graph TD
+A --&gt; B
+</pre>
+
+
+
+Text
 "#;
 
         assert_eq!(expected, add_mermaid(content).unwrap());
