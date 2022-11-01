@@ -37,16 +37,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Setup | Checkout
-        uses: actions/checkout@v2
-
-      # Cache files between builds
-      - name: Setup | Cache Cargo
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        uses: actions/checkout@v3
 
       - name: Setup | Rust
         uses: actions-rs/toolchain@v1
@@ -55,6 +46,8 @@ jobs:
           override: true
           profile: minimal
           target: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v1
 
       - name: Setup | musl tools
         if: matrix.target == 'x86_64-unknown-linux-musl'
@@ -92,7 +85,7 @@ jobs:
           cd -
 
       - name: Post Setup | Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }}
           path: target/stage/*
@@ -104,12 +97,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup | Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Setup | Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
 
       - name: Setup | Release notes
         run: |
