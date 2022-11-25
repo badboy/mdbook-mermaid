@@ -57,6 +57,7 @@ fn add_mermaid(content: &str) -> Result<String> {
     opts.insert(Options::ENABLE_TASKLISTS);
 
     let mut code_span = 0..0;
+    let mut start_new_code_span = true;
 
     let mut mermaid_blocks = vec![];
 
@@ -77,7 +78,14 @@ fn add_mermaid(content: &str) -> Result<String> {
 
         // We're in the code block. The text is what we want.
         if let Event::Text(_) = e {
-            code_span = span;
+            if start_new_code_span {
+                code_span = span;
+                start_new_code_span = false;
+            } else {
+                code_span = code_span.start..span.end;
+            }
+            println!("{:?}", e);
+            
             continue;
         }
 
@@ -90,8 +98,10 @@ fn add_mermaid(content: &str) -> Result<String> {
 
             let mermaid_content = &content[code_span.clone()];
             let mermaid_content = escape_html(mermaid_content);
+            let mermaid_content = mermaid_content.replace("\r\n", "\n");
             let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
             mermaid_blocks.push((span, mermaid_code));
+            start_new_code_span = true;
         }
     }
 
@@ -276,4 +286,14 @@ Text
 
         assert_eq!(expected, add_mermaid(content).unwrap());
     }
+
+    #[test]
+    fn crlf_line_endings() {
+        let _ = env_logger::try_init();
+        let content = "# Chapter\r\n\r\n````mermaid\r\n\r\ngraph TD\r\nA --> B\r\n````";
+        let expected = "# Chapter\r\n\r\n\n<pre class=\"mermaid\">\ngraph TD\nA --&gt; B\n</pre>\n\n";
+
+        assert_eq!(expected, add_mermaid(content).unwrap());
+    }
+
 }
