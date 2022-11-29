@@ -1,3 +1,8 @@
+# v0.12.2 (2022-11-29)
+
+* BUGFIX: Handle CRLF line endings in code block correctly ([#27](https://github.com/badboy/mdbook-mermaid/pull/27)).
+  Thanks, @pseiko1989.
+
 # v0.12.1 (2022-10-18)
 
 [Full changelog](https://github.com/badboy/mdbook-mermaid/compare/v0.12.0...v0.12.1)
