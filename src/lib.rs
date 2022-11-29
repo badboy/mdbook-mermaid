@@ -85,7 +85,7 @@ fn add_mermaid(content: &str) -> Result<String> {
             } else {
                 code_span = code_span.start..span.end;
             }
-            
+
             continue;
         }
 
@@ -291,9 +291,9 @@ Text
     fn crlf_line_endings() {
         let _ = env_logger::try_init();
         let content = "# Chapter\r\n\r\n````mermaid\r\n\r\ngraph TD\r\nA --> B\r\n````";
-        let expected = "# Chapter\r\n\r\n\n<pre class=\"mermaid\">\ngraph TD\nA --&gt; B\n</pre>\n\n";
+        let expected =
+            "# Chapter\r\n\r\n\n<pre class=\"mermaid\">\ngraph TD\nA --&gt; B\n</pre>\n\n";
 
         assert_eq!(expected, add_mermaid(content).unwrap());
     }
-
 }
