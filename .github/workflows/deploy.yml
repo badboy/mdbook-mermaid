@@ -43,6 +43,9 @@ jobs:
       - name: Setup | Checkout
         uses: actions/checkout@v3
 
+      # Cache files between builds
+      - uses: Swatinem/rust-cache@v1
+
       - name: Setup | Rust
         uses: actions-rs/toolchain@v1
         with:
