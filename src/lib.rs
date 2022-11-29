@@ -77,6 +77,7 @@ fn add_mermaid(content: &str) -> Result<String> {
         }
 
         // We're in the code block. The text is what we want.
+        // Code blocks can come in multiple text events.
         if let Event::Text(_) = e {
             if start_new_code_span {
                 code_span = span;
@@ -84,7 +85,6 @@ fn add_mermaid(content: &str) -> Result<String> {
             } else {
                 code_span = code_span.start..span.end;
             }
-            println!("{:?}", e);
             
             continue;
         }
