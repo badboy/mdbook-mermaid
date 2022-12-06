@@ -24,7 +24,7 @@ jobs:
           - x86_64-pc-windows-msvc
         include:
           - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
+            os: ubuntu-20.04
             name: x86_64-unknown-linux-gnu.tar.gz
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
