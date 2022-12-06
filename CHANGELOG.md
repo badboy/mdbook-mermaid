@@ -1,3 +1,7 @@
+# v0.12.3 (2022-12-06)
+
+* Use Ubuntu 20.04 when building `x86_64-unknown-linux-gnu` to avoid newer glibc
+
 # v0.12.2 (2022-11-29)
 
 * BUGFIX: Handle CRLF line endings in code block correctly ([#27](https://github.com/badboy/mdbook-mermaid/pull/27)).
