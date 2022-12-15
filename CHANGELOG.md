@@ -1,3 +1,8 @@
+# v0.12.4 (2022-12-15)
+
+* Update dependencies, including clap, to avoid breakage
+* Upgrade to mermaid v9.2.2
+
 # v0.12.3 (2022-12-06)
 
 * Use Ubuntu 20.04 when building `x86_64-unknown-linux-gnu` to avoid newer glibc
