@@ -11,11 +11,11 @@ edition = "2018"
 [dependencies]
 mdbook = { version = "0.4.21", default-features = false }
 pulldown-cmark = { version = "0.9.0", default-features = false }
-env_logger = "0.9.0"
+env_logger = "0.10.0"
 log = "0.4.11"
-clap = "3.1.18"
+clap = "4.0.29"
 serde_json = "1.0.57"
-toml_edit = { version = "0.14.4", default-features = false }
+toml_edit = { version = "0.15.0", default-features = false }
 
 [dev-dependencies]
 assert_cmd = "2.0.0"

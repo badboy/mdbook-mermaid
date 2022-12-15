@@ -18,7 +18,7 @@ const MERMAID_FILES: &[(&str, &[u8])] = &[
     ("mermaid-init.js", MERMAID_INIT_JS),
 ];
 
-pub fn make_app() -> Command<'static> {
+pub fn make_app() -> Command {
     Command::new("mdbook-mermaid")
         .version(crate_version!())
         .about("mdbook preprocessor to add mermaid support")
@@ -72,7 +72,7 @@ fn handle_preprocessing() -> Result<(), Error> {
 }
 
 fn handle_supports(sub_args: &ArgMatches) -> ! {
-    let renderer = sub_args.value_of("renderer").expect("Required argument");
+    let renderer = sub_args.get_one::<String>("renderer").expect("Required argument");
     let supported = Mermaid.supports_renderer(renderer);
 
     // Signal whether the renderer is supported by exiting with 1 or 0.
@@ -84,8 +84,7 @@ fn handle_supports(sub_args: &ArgMatches) -> ! {
 }
 
 fn handle_install(sub_args: &ArgMatches) -> ! {
-    let dir = sub_args.value_of("dir").expect("Required argument");
-    let proj_dir = PathBuf::from(dir);
+    let proj_dir = sub_args.get_one::<PathBuf>("dir").expect("Required argument");
     let config = proj_dir.join("book.toml");
 
     if !config.exists() {
