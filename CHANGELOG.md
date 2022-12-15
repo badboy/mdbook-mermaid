@@ -1,3 +1,7 @@
+# v0.12.5 (2022-12-15)
+
+* Ensure the right features on dependencies are enabled
+
 # v0.12.4 (2022-12-15)
 
 * Update dependencies, including clap, to avoid breakage
