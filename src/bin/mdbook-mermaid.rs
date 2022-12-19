@@ -87,8 +87,9 @@ fn handle_supports(sub_args: &ArgMatches) -> ! {
 
 fn handle_install(sub_args: &ArgMatches) -> ! {
     let proj_dir = sub_args
-        .get_one::<PathBuf>("dir")
+        .get_one::<String>("dir")
         .expect("Required argument");
+    let proj_dir = PathBuf::from(proj_dir);
     let config = proj_dir.join("book.toml");
 
     if !config.exists() {
