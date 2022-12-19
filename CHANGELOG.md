@@ -1,3 +1,7 @@
+# v0.12.6 (2022-12-19)
+
+* Fix issue with extracting the `dir` parameter on `mdbook-mermaid install`
+
 # v0.12.5 (2022-12-15)
 
 * Ensure the right features on dependencies are enabled
