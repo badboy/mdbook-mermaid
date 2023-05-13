@@ -26,18 +26,37 @@ in your book.
 
 ## Installation
 
-If you want to use only this preprocessor, install the tool:
+### Install `mdbook-mermaid`
+
+If you want to use only this preprocessor, install the tool.
+
+Simplest and quickest way to install is by [Cargo `binstall`](https://github.com/cargo-bins/cargo-binstall). 
+This installs the right binaries released here on GitHub (which you could also download manually).
+
+```
+  yes | cargo binstall mdbook-mermaid
+ INFO resolve: Resolving package: 'mdbook-mermaid'
+ WARN The package mdbook-mermaid v0.12.6 will be downloaded from github.com
+ INFO This will install the following binaries:
+ INFO   - mdbook-mermaid (mdbook-mermaid -> /home/user/.cargo/bin/mdbook-mermaid)
+Do you wish to continue? yes/[no]
+?  INFO Installing binaries...
+ INFO Done in 1.248059328s
+```
+
+You can also install using a bare Cargo installation, compiling from source:
 
 ```
 cargo install mdbook-mermaid
 ```
+
+### Configure your mdBook to use `mdbook-mermaid`
 
 Then let `mdbook-mermaid` add the required files and configuration:
 
 ```
 mdbook-mermaid install path/to/your/book
 ```
-
 
 This will add the following configuration to your `book.toml`:
 
