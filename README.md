@@ -30,7 +30,7 @@ in your book.
 
 If you want to use only this preprocessor, install the tool.
 
-Simplest and quickest way to install is by [Cargo `binstall`](https://github.com/cargo-bins/cargo-binstall). 
+The simplest and quickest way to install is by [Cargo `binstall`](https://github.com/cargo-bins/cargo-binstall). 
 This installs the right binaries released here on GitHub (which you could also download manually).
 
 ```
@@ -44,7 +44,8 @@ Do you wish to continue? yes/[no]
  INFO Done in 1.248059328s
 ```
 
-You can also install using a bare Cargo installation, compiling from source:
+You can also install using a bare Cargo installation.
+This fetches all dependencies and compiles from source.
 
 ```
 cargo install mdbook-mermaid
