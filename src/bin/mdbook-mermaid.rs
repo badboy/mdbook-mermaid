@@ -6,6 +6,7 @@ use toml_edit::{value, Array, Document, Item, Table, Value};
 
 use std::{
     fs::{self, File},
+    fs::create_dir_all,
     io::{self, Write},
     path::PathBuf,
     process,
@@ -33,6 +34,11 @@ pub fn make_app() -> Command {
                     Arg::new("dir")
                     .default_value(".")
                     .help("Root directory for the book,\nshould contain the configuration file (`book.toml`)")
+                    )
+                .arg(
+                    Arg::new("public-path")
+                    .default_value(".")
+                    .help("Subdirectory that should host the additional js files")
                     )
                 .about("Install the required assset files and include it in the config"),
         )
@@ -89,6 +95,9 @@ fn handle_install(sub_args: &ArgMatches) -> ! {
     let proj_dir = sub_args
         .get_one::<String>("dir")
         .expect("Required argument");
+    let public_dir = sub_args
+        .get_one::<String>("public-path")
+        .expect("Required subfolder");
     let proj_dir = PathBuf::from(proj_dir);
     let config = proj_dir.join("book.toml");
 
@@ -109,7 +118,7 @@ fn handle_install(sub_args: &ArgMatches) -> ! {
         add_preprocessor(&mut doc);
     }
 
-    let added_files = add_additional_files(&mut doc);
+    let added_files = add_additional_files(&mut doc, public_dir);
 
     if !has_pre || added_files {
         log::info!("Saving changed configuration to {}", config.display());
@@ -121,7 +130,8 @@ fn handle_install(sub_args: &ArgMatches) -> ! {
 
     let mut printed = false;
     for (name, content) in MERMAID_FILES {
-        let filepath = proj_dir.join(name);
+        let subfolderpath = proj_dir.join(public_dir);
+        let filepath = subfolderpath.join(name);
         if filepath.exists() {
             log::debug!(
                 "'{}' already exists (Path: {}). Skipping.",
@@ -129,6 +139,10 @@ fn handle_install(sub_args: &ArgMatches) -> ! {
                 filepath.display()
             );
         } else {
+            if !subfolderpath.exists() {
+                create_dir_all(subfolderpath)
+                    .expect("can't create subfolder");
+            }
             if !printed {
                 printed = true;
                 log::info!(
@@ -156,11 +170,12 @@ graph TD;
     process::exit(0);
 }
 
-fn add_additional_files(doc: &mut Document) -> bool {
+fn add_additional_files(doc: &mut Document, public_dir: &String) -> bool {
     let mut changed = false;
     let mut printed = false;
 
-    let file = "mermaid.min.js";
+    let filepath = PathBuf::from(public_dir).join("mermaid.min.js");
+    let file = filepath.to_str().unwrap();
     let additional_js = additional(doc, "js");
     if has_file(&additional_js, file) {
         log::debug!("'{}' already in 'additional-js'. Skipping", file)
@@ -172,7 +187,8 @@ fn add_additional_files(doc: &mut Document) -> bool {
         changed = true;
     }
 
-    let file = "mermaid-init.js";
+    let filepath = PathBuf::from(public_dir).join("mermaid-init.js");
+    let file = filepath.to_str().unwrap();
     let additional_js = additional(doc, "js");
     if has_file(&additional_js, file) {
         log::debug!("'{}' already in 'additional-js'. Skipping", file)
