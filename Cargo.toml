@@ -9,7 +9,7 @@ repository = "https://github.com/badboy/mdbook-mermaid"
 edition = "2018"
 
 [dependencies]
-mdbook = { version = "0.4.21", default-features = false }
+mdbook = { version = "0.4.36", default-features = false }
 pulldown-cmark = { version = "0.9.0", default-features = false }
 env_logger = "0.10.0"
 log = "0.4.11"
