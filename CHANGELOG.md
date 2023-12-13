@@ -1,3 +1,8 @@
+# v0.13.0 (2023-12-13)
+
+* Update dependencies
+* Upgrade to mermaid v10.6.1
+
 # v0.12.6 (2022-12-19)
 
 * Fix issue with extracting the `dir` parameter on `mdbook-mermaid install`
