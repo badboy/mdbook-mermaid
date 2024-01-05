@@ -26,18 +26,38 @@ in your book.
 
 ## Installation
 
-If you want to use only this preprocessor, install the tool:
+### From source
+
+To install it from source:
 
 ```
 cargo install mdbook-mermaid
 ```
 
-Then let `mdbook-mermaid` add the required files and configuration:
+This will build `mdbook-mermaid` from source.
+
+### Using `cargo-binstall`
+
+If you have [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) already:
+
+```
+cargo binstall mdbook-mermaid
+```
+
+This will download and install the pre-built binary for your system.
+
+### Manually
+
+Binary releases are available on the [Releases page](https://github.com/badboy/mdbook-mermaid/releases).
+Download the relevant package for your system, unpack it, and move the `mdbook-mermaid` executable into `$HOME/.cargo/bin`:
+
+## Configure your mdBook to use `mdbook-mermaid`
+
+When adding `mdbook-mermaid` for the first time, let it add the required files and configuration:
 
 ```
 mdbook-mermaid install path/to/your/book
 ```
-
 
 This will add the following configuration to your `book.toml`:
 
@@ -66,7 +86,7 @@ mdbook path/to/book
 ## License
 
 MPL. See [LICENSE](LICENSE).  
-Copyright (c) 2018-2021 Jan-Erik Rediger <janerik@fnordig.de>
+Copyright (c) 2018-2024 Jan-Erik Rediger <janerik@fnordig.de>
 
 Mermaid is [MIT licensed](https://github.com/knsv/mermaid/blob/master/LICENSE).
 The bundled assets (`mermaid.min.js`) are MIT licensed.
