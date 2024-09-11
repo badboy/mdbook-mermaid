@@ -8,40 +8,22 @@ env:
 jobs:
   build_and_test:
     name: Build and test
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        rust: [stable]
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-
-    - name: Install ${{ matrix.rust }}
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: ${{ matrix.rust }}
-        override: true
-
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
     - uses: Swatinem/rust-cache@v2
 
     - name: tests
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: --all
+      run: cargo test --all
 
   check_fmt_and_docs:
     name: Checking fmt and docs
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        components: rustfmt, clippy
-        override: true
-
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
     - uses: Swatinem/rust-cache@v2
 
     - name: fmt
