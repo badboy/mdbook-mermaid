@@ -1,4 +1,4 @@
-# v0.14.0 UNRELEASED
+# v0.14.0 (2024-09-11)
 
 * Upgrade to mermaid v11.2.0
 
