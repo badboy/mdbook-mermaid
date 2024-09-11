@@ -1,3 +1,7 @@
+# v0.14.0 UNRELEASED
+
+* Upgrade to mermaid v11.2.0
+
 # v0.13.0 (2023-12-13)
 
 * Update dependencies
