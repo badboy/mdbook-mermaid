@@ -77,11 +77,6 @@ jobs:
           printf 'linker = "%s"\n' "$ccpath" >> .cargo/config.toml
 
       - name: Build | Build
-        if: ${{ ! endsWith(matrix.target, '-musl') }}
-        run: cargo build --release --target ${{ matrix.target }}
-
-      - name: Build | Build (musl)
-        if: ${{ endsWith(matrix.target, '-musl') }}
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Post Setup | Extract tag name
