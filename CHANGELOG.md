@@ -1,3 +1,8 @@
+# v0.14.1 (2025-01-05)
+
+* Update dependencies
+* Add aarch64-unknown-linux-musl as a build target (Thanks, @sekhat)
+
 # v0.14.0 (2024-09-11)
 
 * Upgrade to mermaid v11.2.0
