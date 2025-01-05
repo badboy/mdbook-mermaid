@@ -80,15 +80,13 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Post Setup | Extract tag name
-        if: ${{ !env.ACT }}
         shell: bash
-        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/tags/})"
-        id: extract_tag
-
-      - name: Post Setup | Extract tag name (ACT)
-        if: ${{ env.ACT }}
-        shell: bash
-        run: echo "##[set-output name=tag;]v1.0.0"
+        run: |
+          if [ -z "$ACT" ]; then
+            echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/tags/})"
+          else
+            echo "##[set-output name=tag;]v1.0.0"
+          fi
         id: extract_tag
 
       - name: Post Setup | Prepare artifacts [Windows]
