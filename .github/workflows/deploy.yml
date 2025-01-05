@@ -83,10 +83,12 @@ jobs:
         shell: bash
         run: |
           if [ -z "$ACT" ]; then
-            echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/tags/})"
+            tag="${GITHUB_REF#refs/tags/}"
           else
-            echo "##[set-output name=tag;]v1.0.0"
+            tag="v1.0.0"
           fi
+
+          echo "tag=$tag" >> $GITHUB_OUTPUT
         id: extract_tag
 
       - name: Post Setup | Prepare artifacts [Windows]
