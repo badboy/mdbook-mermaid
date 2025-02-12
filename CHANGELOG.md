@@ -1,3 +1,7 @@
+# v0.15.0 UNRELEASED
+
+* Upgrade to mermaid v11.4.1
+
 # v0.14.1 (2025-01-05)
 
 * Update dependencies
