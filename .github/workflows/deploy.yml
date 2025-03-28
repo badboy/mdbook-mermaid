@@ -94,7 +94,7 @@ jobs:
       - name: Post Setup | Prepare artifacts [Windows]
         if: matrix.os == 'windows-latest'
         run: |
-          mkdir target/stage
+          mkdir -p target/stage
           cd target/${{ matrix.target }}/release
           strip ${{ env.CRATE_NAME }}.exe
           7z a ../../stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }} ${{ env.CRATE_NAME }}.exe
@@ -103,7 +103,7 @@ jobs:
       - name: Post Setup | Prepare artifacts [-nix]
         if: matrix.os != 'windows-latest'
         run: |
-          mkdir target/stage
+          mkdir -p target/stage
           cd target/${{ matrix.target }}/release
           if [ "${{ matrix.target }}" != "aarch64-unknown-linux-musl" ]; then
             strip ${{ env.CRATE_NAME }}
