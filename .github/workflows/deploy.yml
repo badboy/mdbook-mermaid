@@ -72,7 +72,7 @@ jobs:
           echo "d3c597e89f4b87f78d473f1f6a539ed817afbce9b73a02dd123c6d5c4e43f617 *aarch64-unknown-linux-musl.tar.xz" | sha256sum -c -
           ccpath=$(realpath $(find . -name aarch64-unknown-linux-musl-cc))
           popd
-          mkdir .cargo
+          mkdir -p .cargo
           echo "[target.aarch64-unknown-linux-musl]" > .cargo/config.toml
           printf 'linker = "%s"\n' "$ccpath" >> .cargo/config.toml
 
