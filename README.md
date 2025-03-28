@@ -83,6 +83,27 @@ Finally, build your book:
 mdbook path/to/book
 ```
 
+## Development
+
+### Update the bundled mermaid.js
+
+Find the latest version of `mermaid` on <https://github.com/mermaid-js/mermaid/releases>.
+Then run:
+
+```
+cargo xtask <version>
+```
+
+This will fetch the minified mermaid.js file and commit it.
+
+**Note:** `mdbook-mermaid` does NOT automatically update the `mermaid.min.js` file in your book. For that rerun
+
+```
+mdbook-mermaid install path/to/your/book
+```
+
+or manually replace the file.
+
 ## License
 
 MPL. See [LICENSE](LICENSE).  

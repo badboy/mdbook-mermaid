@@ -21,3 +21,6 @@ toml_edit = { version = "0.15.0", default-features = false }
 assert_cmd = "2.0.0"
 pretty_assertions = "1.4.0"
 tempfile = "3.3.0"
+
+[workspace]
+members = [".", "xtask"]
