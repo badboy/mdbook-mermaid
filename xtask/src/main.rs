@@ -2,7 +2,7 @@ use std::env;
 use std::fs::File;
 use std::io::Write;
 
-use xshell::{cmd, Shell};
+use xshell::{Shell, cmd};
 
 type Result<T, E = Box<dyn std::error::Error>> = std::result::Result<T, E>;
 
