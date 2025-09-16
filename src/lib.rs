@@ -5,7 +5,7 @@
 use mdbook::book::{Book, BookItem, Chapter};
 use mdbook::errors::Result;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use pulldown_cmark::{CodeBlockKind::*, Event, Options, Parser, Tag};
+use pulldown_cmark::{CodeBlockKind::*, Event, Options, Parser, Tag, TagEnd};
 
 pub struct Mermaid;
 
@@ -93,11 +93,7 @@ fn add_mermaid(content: &str) -> Result<String> {
             continue;
         }
 
-        if let Event::End(Tag::CodeBlock(Fenced(code))) = e {
-            assert_eq!(
-                "mermaid", &*code,
-                "After an opening mermaid code block we expect it to close again"
-            );
+        if let Event::End(TagEnd::CodeBlock) = e {
             in_mermaid_block = false;
 
             let mermaid_content = &content[code_span.clone()];
