@@ -1,3 +1,7 @@
+# v0.16.0 (2025-09-16)
+
+* Update to mdbook v0.4.52
+
 # v0.15.0 (2025-03-28)
 
 * Upgrade to mermaid v11.2.0
