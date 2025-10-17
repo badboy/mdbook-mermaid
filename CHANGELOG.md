@@ -1,3 +1,7 @@
+# v0.16.1 (2025-10-17)
+
+* Unchanged to v0.16.1, but that release got stuck
+
 # v0.16.0 (2025-09-16)
 
 * Update to mdbook v0.4.52
