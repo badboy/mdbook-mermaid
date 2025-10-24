@@ -2,9 +2,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-use mdbook::book::{Book, BookItem, Chapter};
-use mdbook::errors::Result;
-use mdbook::preprocess::{Preprocessor, PreprocessorContext};
+use mdbook_preprocessor::book::{Book, BookItem, Chapter};
+use mdbook_preprocessor::errors::Result;
+use mdbook_preprocessor::{Preprocessor, PreprocessorContext};
 use pulldown_cmark::{CodeBlockKind::*, Event, Options, Parser, Tag, TagEnd};
 
 pub struct Mermaid;
@@ -31,8 +31,8 @@ impl Preprocessor for Mermaid {
         res.unwrap_or(Ok(())).map(|_| book)
     }
 
-    fn supports_renderer(&self, renderer: &str) -> bool {
-        renderer == "html"
+    fn supports_renderer(&self, renderer: &str) -> Result<bool> {
+        Ok(renderer == "html")
     }
 }
 
