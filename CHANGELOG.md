@@ -1,3 +1,8 @@
+# v0.17.0 (2025-11-18)
+
+* Update to mdbook v0.5 -- this now uses `mdbook-preprocessor`, which should make the build a bit faster
+* Update dependencies
+
 # v0.16.2 (2025-10-17)
 
 * Unchanged to v0.16.0, but that release got stuck
