@@ -5,6 +5,7 @@
 use std::fs;
 use std::process::Command;
 
+use assert_cmd::cargo;
 use assert_cmd::prelude::*;
 
 macro_rules! test_install {
@@ -17,7 +18,7 @@ macro_rules! test_install {
         let book_toml = tmp.path().join("book.toml");
         fs::write(&book_toml, input).expect("can't write book.toml");
 
-        let mut cmd = Command::cargo_bin("mdbook-mermaid").unwrap();
+        let mut cmd = Command::new(cargo::cargo_bin!("mdbook-mermaid"));
         cmd.arg("install").current_dir(tmp.path());
         cmd.assert().success();
 
