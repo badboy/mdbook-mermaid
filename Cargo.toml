@@ -1,12 +1,12 @@
 [package]
 name = "mdbook-mermaid-ssr"
 version = "0.1.0"
-authors = ["Jan-Erik Rediger <janerik@fnordig.de>"]
+authors = ["Frank Elsinga <frank.elsinga@tum.de>", "Jan-Erik Rediger <janerik@fnordig.de>"]
 description = "mdbook preprocessor to add mermaid support with server-side rendering"
 license = "MPL-2.0"
-homepage = "https://github.com/badboy/mdbook-mermaid"
-repository = "https://github.com/badboy/mdbook-mermaid"
-edition = "2018"
+homepage = "https://github.com/CommanderStorm/mdbook-mermaid-ssr"
+repository = "https://github.com/CommanderStorm/mdbook-mermaid-ssr"
+edition = "2024"
 
 [[bin]]
 name = "mdbook-mermaid-ssr"
@@ -32,3 +32,19 @@ tempfile = "3.3.0"
 
 [workspace]
 members = [".", "xtask"]
+
+[workspace.lints.clippy]
+# Restrictions
+unimplemented = "warn"
+panic_in_result_fn = "warn"
+panic = "warn"
+todo = "warn"
+# Pedantics without being too noisy
+pedantic = { level = "warn", priority = -1 }
+derive_partial_eq_without_eq = "allow"
+enum_variant_names = "allow"
+implicit_hasher = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+struct_field_names = "allow"
