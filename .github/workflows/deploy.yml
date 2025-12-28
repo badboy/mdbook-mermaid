@@ -7,7 +7,7 @@ on:
       - "*"
 
 env:
-  CRATE_NAME: mdbook-mermaid
+  CRATE_NAME: mdbook-mermaid-ssr
 
 jobs:
   # Build sources for every OS

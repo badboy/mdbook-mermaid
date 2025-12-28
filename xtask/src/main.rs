@@ -21,21 +21,23 @@ fn main() -> Result<()> {
     let release_url =
         format!("https://github.com/mermaid-js/mermaid/releases/tag/mermaid%40{version}");
     let asset_url = format!("https://unpkg.com/mermaid@{version}/dist/mermaid.min.js");
-    let asset_path = "src/bin/assets/mermaid.min.js";
+    let payload_path = "payload/mermaid.min.js";
 
-    let commit_msg =
-        format!("Upgrade to mermaid v{version}\n\nRelease: {release_url}\nAsset URL: {asset_url}");
+    let commit_msg = format!(
+        "Upgrade to mermaid v{version}\n\nRelease: {release_url}\nAsset URL: {asset_url}\n\nSSR-only: Updated payload for headless Chrome rendering."
+    );
 
     let sh = Shell::new()?;
 
-    let mut fp = File::create(asset_path)?;
     let asset_content = cmd!(sh, "curl {asset_url}").read()?;
+    let full_content = format!("{LICENSE_HEADER}{asset_content}");
 
-    write!(fp, "{LICENSE_HEADER}")?;
-    write!(fp, "{asset_content}")?;
+    // Write to payload/mermaid.min.js for SSR rendering in headless Chrome
+    let mut fp = File::create(payload_path)?;
+    write!(fp, "{full_content}")?;
     drop(fp);
 
-    cmd!(sh, "git add src/bin/assets").run()?;
+    cmd!(sh, "git add payload").run()?;
     cmd!(sh, "git commit -m {commit_msg}").run()?;
 
     Ok(())

@@ -1,21 +1,29 @@
 [package]
-name = "mdbook-mermaid"
-version = "0.17.0"
+name = "mdbook-mermaid-ssr"
+version = "0.1.0"
 authors = ["Jan-Erik Rediger <janerik@fnordig.de>"]
-description = "mdbook preprocessor to add mermaid support"
+description = "mdbook preprocessor to add mermaid support with server-side rendering"
 license = "MPL-2.0"
 homepage = "https://github.com/badboy/mdbook-mermaid"
 repository = "https://github.com/badboy/mdbook-mermaid"
 edition = "2018"
 
+[[bin]]
+name = "mdbook-mermaid-ssr"
+path = "src/bin/mdbook-mermaid-ssr.rs"
+
 [dependencies]
 mdbook-preprocessor = "0.5.0"
-pulldown-cmark = { version = "0.10.0", default-features = false }
+pulldown-cmark = { version = "0.13.0", default-features = false }
 env_logger = "0.11.8"
 log = "0.4.11"
-clap = { version = "4.0.29", features = ["cargo"] }
+clap = { version = "4.0.29", features = ["cargo", "derive"] }
 serde_json = "1.0.57"
-toml_edit = { version = "0.15.0", default-features = false }
+toml = "0.9"
+headless_chrome = "1.0"
+escape_string = "0.1"
+unescape = "0.1"
+anyhow = "1.0"
 
 [dev-dependencies]
 assert_cmd = "2.0.0"

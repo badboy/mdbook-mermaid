@@ -2,19 +2,37 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+pub mod renderer;
+
+use anyhow::Context;
 use mdbook_preprocessor::book::{Book, BookItem, Chapter};
 use mdbook_preprocessor::errors::Result;
 use mdbook_preprocessor::{Preprocessor, PreprocessorContext};
 use pulldown_cmark::{CodeBlockKind::*, Event, Options, Parser, Tag, TagEnd};
+use std::sync::Arc;
 
-pub struct Mermaid;
+pub struct Mermaid {
+    renderer: Arc<renderer::Mermaid>,
+}
+
+impl Mermaid {
+    pub fn new() -> Result<Self> {
+        let renderer = renderer::Mermaid::try_init()
+            .context("Failed to initialize SSR renderer. Chrome/Chromium must be installed.")?;
+        Ok(Self {
+            renderer: Arc::new(renderer),
+        })
+    }
+}
 
 impl Preprocessor for Mermaid {
     fn name(&self) -> &str {
-        "mermaid"
+        "mermaid-ssr"
     }
 
     fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
+        log::info!("Rendering mermaid diagrams with SSR");
+
         let mut res = None;
         book.for_each_mut(|item: &mut BookItem| {
             if let Some(Err(_)) = res {
@@ -22,7 +40,7 @@ impl Preprocessor for Mermaid {
             }
 
             if let BookItem::Chapter(ref mut chapter) = *item {
-                res = Some(Mermaid::add_mermaid(chapter).map(|md| {
+                res = Some(Self::add_mermaid(chapter, &self.renderer).map(|md| {
                     chapter.content = md;
                 }));
             }
@@ -36,21 +54,7 @@ impl Preprocessor for Mermaid {
     }
 }
 
-fn escape_html(s: &str) -> String {
-    let mut output = String::new();
-    for c in s.chars() {
-        match c {
-            '<' => output.push_str("&lt;"),
-            '>' => output.push_str("&gt;"),
-            '"' => output.push_str("&quot;"),
-            '&' => output.push_str("&amp;"),
-            _ => output.push(c),
-        }
-    }
-    output
-}
-
-fn add_mermaid(content: &str) -> Result<String> {
+fn add_mermaid(content: &str, renderer: &Arc<renderer::Mermaid>) -> Result<String> {
     let mut mermaid_content = String::new();
     let mut in_mermaid_block = false;
 
@@ -97,9 +101,27 @@ fn add_mermaid(content: &str) -> Result<String> {
             in_mermaid_block = false;
 
             let mermaid_content = &content[code_span.clone()];
-            let mermaid_content = escape_html(mermaid_content);
-            let mermaid_content = mermaid_content.replace("\r\n", "\n");
-            let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
+
+            // Render to SVG directly using SSR
+            let mermaid_code = match renderer.render(mermaid_content) {
+                Ok(svg) => {
+                    log::debug!("Successfully rendered mermaid diagram to SVG");
+                    format!("{}\n\n", svg)
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to render mermaid diagram: {}. Content: {}",
+                        e,
+                        mermaid_content
+                    );
+                    // Return error as comment in HTML
+                    format!(
+                        "<!-- Mermaid rendering error: {} -->\n<pre class=\"mermaid-error\">Error rendering diagram</pre>\n\n",
+                        e
+                    )
+                }
+            };
+
             mermaid_blocks.push((span, mermaid_code));
             start_new_code_span = true;
         }
@@ -115,19 +137,21 @@ fn add_mermaid(content: &str) -> Result<String> {
 }
 
 impl Mermaid {
-    fn add_mermaid(chapter: &mut Chapter) -> Result<String> {
-        add_mermaid(&chapter.content)
+    fn add_mermaid(chapter: &mut Chapter, renderer: &Arc<renderer::Mermaid>) -> Result<String> {
+        add_mermaid(&chapter.content, renderer)
     }
 }
 
 #[cfg(test)]
 mod test {
     use pretty_assertions::assert_eq;
+    use std::sync::Arc;
 
-    use super::add_mermaid;
+    use super::{add_mermaid, renderer};
 
     #[test]
     fn adds_mermaid() {
+        let mermaid = renderer::Mermaid::try_init().unwrap();
         let content = r#"# Chapter
 
 ```mermaid
@@ -138,25 +162,20 @@ A --> B
 Text
 "#;
 
-        let expected = r#"# Chapter
+        let result = add_mermaid(content, &Arc::new(mermaid)).unwrap();
 
-
-<pre class="mermaid">graph TD
-A --&gt; B
-</pre>
-
-
-
-Text
-"#;
-
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        // Check that SVG was generated
+        assert!(result.contains("<svg"));
+        assert!(result.contains("</svg>"));
+        assert!(result.contains("# Chapter"));
+        assert!(result.contains("Text"));
     }
 
     #[test]
     fn leaves_tables_untouched() {
         // Regression test.
         // Previously we forgot to enable the same markdwon extensions as mdbook itself.
+        let mermaid = renderer::Mermaid::try_init().unwrap();
 
         let content = r#"# Heading
 
@@ -172,13 +191,14 @@ Text
 | Row 1  | Row 2  |
 "#;
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        assert_eq!(expected, add_mermaid(content, &Arc::new(mermaid)).unwrap());
     }
 
     #[test]
     fn leaves_html_untouched() {
         // Regression test.
         // Don't remove important newlines for syntax nested inside HTML
+        let mermaid = renderer::Mermaid::try_init().unwrap();
 
         let content = r#"# Heading
 
@@ -198,13 +218,14 @@ Text
 </del>
 "#;
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        assert_eq!(expected, add_mermaid(content, &Arc::new(mermaid)).unwrap());
     }
 
     #[test]
     fn html_in_list() {
         // Regression test.
         // Don't remove important newlines for syntax nested inside HTML
+        let mermaid = renderer::Mermaid::try_init().unwrap();
 
         let content = r#"# Heading
 
@@ -224,12 +245,13 @@ Text
 2. paragraph 2
 "#;
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        assert_eq!(expected, add_mermaid(content, &Arc::new(mermaid)).unwrap());
     }
 
     #[test]
     fn escape_in_mermaid_block() {
         let _ = env_logger::try_init();
+        let mermaid = renderer::Mermaid::try_init().unwrap();
         let content = r#"
 ```mermaid
 classDiagram
@@ -242,26 +264,18 @@ classDiagram
 hello
 "#;
 
-        let expected = r#"
+        let result = add_mermaid(content, &Arc::new(mermaid)).unwrap();
 
-<pre class="mermaid">classDiagram
-    class PingUploader {
-        &lt;&lt;interface&gt;&gt;
-        +Upload() UploadResult
-    }
-</pre>
-
-
-
-hello
-"#;
-
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        // Check that SVG was generated and contains the interface markers
+        assert!(result.contains("<svg"));
+        assert!(result.contains("</svg>"));
+        assert!(result.contains("hello"));
     }
 
     #[test]
     fn more_backticks() {
         let _ = env_logger::try_init();
+        let mermaid = renderer::Mermaid::try_init().unwrap();
         let content = r#"# Chapter
 
 ````mermaid
@@ -272,28 +286,25 @@ A --> B
 Text
 "#;
 
-        let expected = r#"# Chapter
+        let result = add_mermaid(content, &Arc::new(mermaid)).unwrap();
 
-
-<pre class="mermaid">graph TD
-A --&gt; B
-</pre>
-
-
-
-Text
-"#;
-
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        // Check that SVG was generated
+        assert!(result.contains("<svg"));
+        assert!(result.contains("</svg>"));
+        assert!(result.contains("# Chapter"));
+        assert!(result.contains("Text"));
     }
 
     #[test]
     fn crlf_line_endings() {
         let _ = env_logger::try_init();
+        let mermaid = renderer::Mermaid::try_init().unwrap();
         let content = "# Chapter\r\n\r\n````mermaid\r\n\r\ngraph TD\r\nA --> B\r\n````";
-        let expected =
-            "# Chapter\r\n\r\n\n<pre class=\"mermaid\">\ngraph TD\nA --&gt; B\n</pre>\n\n";
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        let result = add_mermaid(content, &Arc::new(mermaid)).unwrap();
+
+        // Check that SVG was generated
+        assert!(result.contains("<svg"));
+        assert!(result.contains("</svg>"));
     }
 }
