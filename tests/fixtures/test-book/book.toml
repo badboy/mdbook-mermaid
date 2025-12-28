@@ -1,0 +1,7 @@
+[book]
+title = "Test Book"
+authors = ["Test Author"]
+
+[preprocessor.mermaid-ssr]
+
+[output.html]

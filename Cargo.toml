@@ -29,6 +29,8 @@ anyhow = "1.0"
 assert_cmd = "2.0.0"
 pretty_assertions = "1.4.0"
 tempfile = "3.3.0"
+insta = "1.45"
+mdbook = "0.4"
 
 [workspace]
 members = [".", "xtask"]
