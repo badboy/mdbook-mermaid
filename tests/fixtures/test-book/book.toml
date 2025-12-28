@@ -5,3 +5,4 @@ authors = ["Test Author"]
 [preprocessor.mermaid-ssr]
 
 [output.html]
+search.enable = false
