@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use mdbook_mermaid_ssr::Mermaid;
-use mdbook_preprocessor::errors::Error;
 use mdbook_preprocessor::Preprocessor;
+use mdbook_preprocessor::errors::Error;
 
 use std::{io, process};
 

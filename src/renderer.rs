@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use escape_string::escape;
 use headless_chrome::{Browser, Tab};
 use unescape::unescape;
