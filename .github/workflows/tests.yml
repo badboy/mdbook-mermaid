@@ -16,16 +16,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
+    - name: Install mdbook
+      run: |
+        cargo install cargo-binstall
+        cargo binstall mdbook
     - uses: Swatinem/rust-cache@v2
 
     - name: Install Chromium
       run: |
         sudo apt-get update
         sudo apt-get install -y chromium-browser
-
-    - name: Install mdbook
-      run: |
-        cargo install mdbook
 
     - name: tests
       run: cargo test --all
