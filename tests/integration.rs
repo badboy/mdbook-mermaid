@@ -13,7 +13,9 @@ fn test_book_dir() -> PathBuf {
 }
 
 fn output_dir() -> PathBuf {
-    test_book_dir().join("book")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("target")
+        .join("test-book")
 }
 
 fn ensure_built() {
