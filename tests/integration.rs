@@ -20,6 +20,20 @@ fn output_dir() -> PathBuf {
 
 fn ensure_built() {
     BUILD_ONCE.call_once(|| {
+        // First, build the mdbook-mermaid-ssr binary
+        let build_status = Command::new("cargo")
+            .arg("build")
+            .arg("--bin")
+            .arg("mdbook-mermaid-ssr")
+            .current_dir(env!("CARGO_MANIFEST_DIR"))
+            .status()
+            .expect("Failed to build mdbook-mermaid-ssr");
+
+        assert!(
+            build_status.success(),
+            "Failed to build mdbook-mermaid-ssr binary"
+        );
+
         let book_dir = test_book_dir();
         let output = output_dir();
 
@@ -28,12 +42,24 @@ fn ensure_built() {
             fs::remove_dir_all(&output).expect("Failed to clean output directory");
         }
 
+        // Get the path to the built binary
+        let binary_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("target")
+            .join("debug")
+            .join("mdbook-mermaid-ssr");
+
+        // Add the binary directory to PATH for mdbook to find the preprocessor
+        let path_env = std::env::var("PATH").unwrap_or_default();
+        let binary_dir = binary_path.parent().unwrap();
+        let new_path = format!("{}:{}", binary_dir.display(), path_env);
+
         // Build the book using mdbook
         let status = Command::new("mdbook")
             .arg("build")
             .arg("--dest-dir")
             .arg(output)
             .current_dir(&book_dir)
+            .env("PATH", new_path)
             .status()
             .expect("Failed to run mdbook build");
 
