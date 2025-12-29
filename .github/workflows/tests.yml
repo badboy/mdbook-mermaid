@@ -23,6 +23,10 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y chromium-browser
 
+    - name: Install mdbook
+      run: |
+        cargo install mdbook
+
     - name: tests
       run: cargo test --all
 
