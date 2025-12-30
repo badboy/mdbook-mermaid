@@ -19,7 +19,7 @@ jobs:
     - name: Install mdbook
       run: |
         cargo install cargo-binstall
-        cargo binstall mdbook
+        cargo binstall -y mdbook
     - uses: Swatinem/rust-cache@v2
 
     - name: Install Chromium
