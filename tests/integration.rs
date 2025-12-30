@@ -129,5 +129,8 @@ fn test_chapter_without_mermaid() {
     assert!(content.contains("rust"), "Should preserve rust code blocks");
 
     // Snapshot the HTML content
+    let content = regex::Regex::new(r#"<script src="toc-.+\.js">"#)
+        .unwrap()
+        .replace_all(&content, r#"<script src="toc-REDACTED.js">"#);
     insta::assert_snapshot!("chapter_without_mermaid_html", content);
 }
