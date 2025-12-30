@@ -14,13 +14,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
     - uses: dtolnay/rust-toolchain@stable
     - name: Install mdbook
       run: |
         cargo install cargo-binstall
         cargo binstall -y mdbook
-    - uses: Swatinem/rust-cache@v2
+    - uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
 
     - name: Install Chromium
       run: |
@@ -34,7 +34,7 @@ jobs:
     name: Checking fmt and docs
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
     - uses: dtolnay/rust-toolchain@stable
     - run: cargo fmt --all -- --check
     - run: cargo clippy --all
@@ -74,10 +74,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Setup | Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # Cache files between builds
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
 
       - name: Setup | Rust
         uses: dtolnay/rust-toolchain@stable
@@ -141,7 +141,7 @@ jobs:
           cd -
 
       - name: Post Setup | Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }}
           path: target/stage/*
@@ -188,12 +188,12 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
         - name: Download build artifacts
           if: ${{ steps.release.outputs.releases_created == 'true' }}
-          uses: actions/download-artifact@v4
+          uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
           with:
             path: artifacts
         - name: Attach artifacts to release
           if: ${{ steps.release.outputs.releases_created == 'true' }}
-          uses: softprops/action-gh-release@v1
+          uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
           with:
             files: artifacts/**/*
             tag_name: ${{ steps.release.outputs.tag }}
