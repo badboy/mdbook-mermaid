@@ -1,6 +1,6 @@
 [package]
 name = "mdbook-mermaid-ssr"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["Frank Elsinga <frank.elsinga@tum.de>", "Jan-Erik Rediger <janerik@fnordig.de>"]
 description = "mdbook preprocessor to add mermaid support with server-side rendering"
 license = "MPL-2.0"
