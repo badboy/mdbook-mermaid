@@ -1,6 +1,6 @@
 ---
 source: tests/integration.rs
-expression: redacted_content
+expression: content
 ---
 <!DOCTYPE HTML>
 <html lang="en" class="light sidebar-visible" dir="ltr">
@@ -41,7 +41,7 @@ expression: redacted_content
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-96ecbecd.js"></script>
+        <script src="toc-REDACTED.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">

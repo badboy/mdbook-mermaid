@@ -99,12 +99,15 @@ fn test_chapter_with_mermaid() {
     );
 
     // Redact non-deterministic mermaid diagram IDs before snapshotting
-    let redacted_content = regex::Regex::new(r"mermaid-diagram-\d+")
+    let content = regex::Regex::new(r"mermaid-diagram-\d+")
+        .unwrap()
+        .replace_all(&content, "mermaid-diagram-REDACTED");
+    let content = regex::Regex::new(r"toc-\d\.js+")
         .unwrap()
         .replace_all(&content, "mermaid-diagram-REDACTED");
 
     // Snapshot the HTML content
-    insta::assert_snapshot!("chapter_with_mermaid_html", redacted_content);
+    insta::assert_snapshot!("chapter_with_mermaid_html", content);
 }
 
 #[test]
