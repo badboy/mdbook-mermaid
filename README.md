@@ -145,4 +145,4 @@ Copyright (c) 2018-2024 Jan-Erik Rediger <janerik@fnordig.de>
 This is a fork focusing on server-side rendering only.
 
 Mermaid is [MIT licensed](https://github.com/knsv/mermaid/blob/master/LICENSE).
-The bundled assets (`payload/mermaid.min.js`) are MIT licensed.
+The bundled assets (`payload/mermaid.js`) are MIT licensed.

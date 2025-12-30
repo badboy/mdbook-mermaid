@@ -17,7 +17,7 @@ impl Mermaid {
     /// Initializes Mermaid
     pub fn try_init() -> Result<Self> {
         let browser = Browser::default()?;
-        let mermaid_js = include_str!("../payload/mermaid.min.js");
+        let mermaid_js = include_str!("../payload/mermaid.js");
         let html_payload = include_str!("../payload/index.html");
 
         let tab = browser.new_tab()?;

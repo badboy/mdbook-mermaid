@@ -4,7 +4,7 @@
   "private": true,
   "description": "Mermaid.js payload management for mdbook-mermaid-ssr",
   "scripts": {
-    "sync": "cp node_modules/mermaid/dist/mermaid.min.js payload/mermaid.min.js",
+    "sync": "cp node_modules/mermaid/dist/mermaid.js payload/mermaid.js",
     "postinstall": "npm run sync"
   },
   "dependencies": {
