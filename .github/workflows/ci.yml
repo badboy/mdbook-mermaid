@@ -160,48 +160,48 @@ jobs:
         name: CI Result
         run: exit 1
 
-    # Release unpublished packages or create a PR with changes
-    release-plz:
-      needs: [ done ]
-      if: |
-        always()
-        && needs.done.result == 'success'
-        && github.event_name == 'push'
-        && github.ref == 'refs/heads/main'
-        && github.repository_owner == 'CommanderStorm'
-      runs-on: ubuntu-latest
-      permissions:
-        contents: read
-        id-token: write
-      concurrency:
-        group: release-plz-${{ github.ref }}
-        cancel-in-progress: false
-      steps:
-        - uses: dtolnay/rust-toolchain@stable
-        - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-          with: { fetch-depth: 0, persist-credentials: false }
-        - name: Publish to crates.io if crate's version is newer
-          uses: release-plz/action@487eb7b5c085a664d5c5ca05f4159bd9b591182a # v0.5.120
-          id: release
-          with: { command: release }
-          env:
-            GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
-        - name: Download build artifacts
-          if: ${{ steps.release.outputs.releases_created == 'true' }}
-          uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-          with:
-            path: artifacts
-        - name: Attach artifacts to release
-          if: ${{ steps.release.outputs.releases_created == 'true' }}
-          uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
-          with:
-            files: artifacts/**/*
-            tag_name: ${{ steps.release.outputs.tag }}
-          env:
-            GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
-        - if: ${{ steps.release.outputs.releases_created == 'false' }}
-          name: If version is the same, create a PR proposing new version and changelog for the next release
-          uses: release-plz/action@487eb7b5c085a664d5c5ca05f4159bd9b591182a # v0.5.120
-          with: { command: release-pr }
-          env:
-            GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
+  # Release unpublished packages or create a PR with changes
+  release-plz:
+    needs: [ done ]
+    if: |
+      always()
+      && needs.done.result == 'success'
+      && github.event_name == 'push'
+      && github.ref == 'refs/heads/main'
+      && github.repository_owner == 'CommanderStorm'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: release-plz-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with: { fetch-depth: 0, persist-credentials: false }
+      - name: Publish to crates.io if crate's version is newer
+        uses: release-plz/action@487eb7b5c085a664d5c5ca05f4159bd9b591182a # v0.5.120
+        id: release
+        with: { command: release }
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
+      - name: Download build artifacts
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          path: artifacts
+      - name: Attach artifacts to release
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        with:
+          files: artifacts/**/*
+          tag_name: ${{ steps.release.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
+      - if: ${{ steps.release.outputs.releases_created == 'false' }}
+        name: If version is the same, create a PR proposing new version and changelog for the next release
+        uses: release-plz/action@487eb7b5c085a664d5c5ca05f4159bd9b591182a # v0.5.120
+        with: { command: release-pr }
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
