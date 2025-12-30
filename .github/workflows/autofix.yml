@@ -1,0 +1,21 @@
+name: autofix.ci
+on: [push, pull_request]
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install npm dependencies and sync payload
+        run: npm ci
+      
+      - name: Run cargo fmt
+        run: cargo fmt
+      
+      - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27

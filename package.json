@@ -1,0 +1,14 @@
+{
+  "name": "mdbook-mermaid-ssr-payload",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mermaid.js payload management for mdbook-mermaid-ssr",
+  "scripts": {
+    "sync-payload": "cp node_modules/mermaid/dist/mermaid.min.js payload/mermaid.min.js",
+    "postinstall": "npm run sync-payload"
+  },
+  "dependencies": {
+    "mermaid": "^11.4.1"
+  },
+  "devDependencies": {}
+}

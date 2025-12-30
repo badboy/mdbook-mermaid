@@ -97,14 +97,10 @@ mdbook path/to/book
 
 ### Update the bundled mermaid.js
 
-Find the latest version of `mermaid` on <https://github.com/mermaid-js/mermaid/releases>.
-Then run:
+The `mermaid.js` payload is managed via npm and automatically updated by Dependabot.
 
-```
-cargo xtask <version>
-```
-
-This will fetch the minified mermaid.js file and commit it to the `payload/` directory for SSR rendering.
+Dependabot will automatically create PRs when new versions of mermaid are released.
+The autofix.ci bot will automatically sync the payload file when the PR is created.
 
 ### Testing
 
