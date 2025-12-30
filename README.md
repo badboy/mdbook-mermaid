@@ -102,6 +102,7 @@ The `mermaid.js` payload is managed via npm and automatically updated by Dependa
 Dependabot will automatically create PRs when new versions of mermaid are released.
 The autofix.ci bot will automatically sync the payload file when the PR is created.
 
+For local development, you can manually sync the payload by running `npm install` in the directory containing the npm configuration for the bundled `mermaid.js`.
 ### Testing
 
 Run the test suite:
