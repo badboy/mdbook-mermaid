@@ -34,7 +34,6 @@ mdbook = "0.5"
 regex = "1.0"
 
 [workspace]
-members = ["."]
 
 [workspace.lints.clippy]
 # Restrictions
