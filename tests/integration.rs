@@ -102,9 +102,9 @@ fn test_chapter_with_mermaid() {
     let content = regex::Regex::new(r"mermaid-diagram-\d+")
         .unwrap()
         .replace_all(&content, "mermaid-diagram-REDACTED");
-    let content = regex::Regex::new(r"toc-\d+\.js")
+    let content = regex::Regex::new(r#"<script src="toc-.+\.js">"#)
         .unwrap()
-        .replace_all(&content, "mermaid-diagram-REDACTED");
+        .replace_all(&content, r#"<script src="toc-REDACTED.js">"#);
 
     // Snapshot the HTML content
     insta::assert_snapshot!("chapter_with_mermaid_html", content);
