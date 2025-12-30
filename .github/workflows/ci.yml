@@ -1,0 +1,207 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  RUSTFLAGS: -Dwarnings
+
+jobs:
+  tests:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+    - name: Install mdbook
+      run: |
+        cargo install cargo-binstall
+        cargo binstall -y mdbook
+    - uses: Swatinem/rust-cache@v2
+
+    - name: Install Chromium
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y chromium-browser
+
+    - name: tests
+      run: cargo test --all
+
+  check_fmt_and_docs:
+    name: Checking fmt and docs
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+    - run: cargo fmt --all -- --check
+    - run: cargo clippy --all
+    - run: cargo doc --no-deps
+
+  build:
+    name: Build release binaries
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - x86_64-unknown-linux-musl
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
+          - x86_64-pc-windows-msvc
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-22.04
+            name: x86_64-unknown-linux-gnu.tar.gz
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            name: aarch64-unknown-linux-musl.tar.gz
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            name: x86_64-unknown-linux-musl.tar.gz
+          - target: x86_64-apple-darwin
+            os: macOS-latest
+            name: x86_64-apple-darwin.tar.gz
+          - target: aarch64-apple-darwin
+            os: macOS-latest
+            name: aarch64-apple-darwin.tar.gz
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            name: x86_64-pc-windows-msvc.zip
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v4
+
+      # Cache files between builds
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Setup | Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Apt Setup on act
+        if: ${{ env.ACT }}
+        run: sudo apt update
+
+      - name: Setup | musl tools
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: sudo apt install -y musl-tools
+
+      - name: Setup | musl cross-compile
+        if: matrix.target == 'aarch64-unknown-linux-musl'
+        run: |
+          pushd /tmp
+          wget https://github.com/musl-cross/musl-cross/releases/download/20241103/aarch64-unknown-linux-musl.tar.xz
+          tar -xf aarch64-unknown-linux-musl.tar.xz
+          echo "d3c597e89f4b87f78d473f1f6a539ed817afbce9b73a02dd123c6d5c4e43f617 *aarch64-unknown-linux-musl.tar.xz" | sha256sum -c -
+          ccpath=$(realpath $(find . -name aarch64-unknown-linux-musl-cc))
+          popd
+          mkdir -p .cargo
+          echo "[target.aarch64-unknown-linux-musl]" > .cargo/config.toml
+          printf 'linker = "%s"\n' "$ccpath" >> .cargo/config.toml
+
+      - name: Build | Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Post Setup | Extract tag name
+        shell: bash
+        run: |
+          if [ -z "$ACT" ]; then
+            tag="${GITHUB_REF#refs/tags/}"
+          else
+            tag="v1.0.0"
+          fi
+
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+        id: extract_tag
+
+      - name: Post Setup | Prepare artifacts [Windows]
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir -p target/stage
+          cd target/${{ matrix.target }}/release
+          strip ${{ env.CRATE_NAME }}.exe
+          7z a ../../stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }} ${{ env.CRATE_NAME }}.exe
+          cd -
+
+      - name: Post Setup | Prepare artifacts [-nix]
+        if: matrix.os != 'windows-latest'
+        run: |
+          mkdir -p target/stage
+          cd target/${{ matrix.target }}/release
+          if [ "${{ matrix.target }}" != "aarch64-unknown-linux-musl" ]; then
+            strip ${{ env.CRATE_NAME }}
+          fi
+          tar czvf ../../stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }} ${{ env.CRATE_NAME }}
+          cd -
+
+      - name: Post Setup | Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }}
+          path: target/stage/*
+  # This final step is needed to mark the whole workflow as successful
+  # Don't change its name - it is used by the merge protection rules
+  done:
+    name: CI Finished
+    runs-on: ubuntu-latest
+    needs: [ build, check_fmt_and_docs, tests  ]
+    if: always()
+    permissions: {}
+    steps:
+      - name: Result of the needed steps
+        run: echo "${{ toJSON(needs) }}" # zizmor: ignore[template-injection]
+      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}
+        name: CI Result
+        run: exit 1
+
+    # Release unpublished packages or create a PR with changes
+    release-plz:
+      needs: [ done ]
+      if: |
+        always()
+        && needs.done.result == 'success'
+        && github.event_name == 'push'
+        && github.ref == 'refs/heads/main'
+        && github.repository_owner == 'CommanderStorm'
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+        id-token: write
+      concurrency:
+        group: release-plz-${{ github.ref }}
+        cancel-in-progress: false
+      steps:
+        - uses: dtolnay/rust-toolchain@stable
+        - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+          with: { fetch-depth: 0, persist-credentials: false }
+        - name: Publish to crates.io if crate's version is newer
+          uses: release-plz/action@487eb7b5c085a664d5c5ca05f4159bd9b591182a # v0.5.120
+          id: release
+          with: { command: release }
+          env:
+            GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
+        - name: Download build artifacts
+          if: ${{ steps.release.outputs.releases_created == 'true' }}
+          uses: actions/download-artifact@v4
+          with:
+            path: artifacts
+        - name: Attach artifacts to release
+          if: ${{ steps.release.outputs.releases_created == 'true' }}
+          uses: softprops/action-gh-release@v1
+          with:
+            files: artifacts/**/*
+            tag_name: ${{ steps.release.outputs.tag }}
+          env:
+            GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
+        - if: ${{ steps.release.outputs.releases_created == 'false' }}
+          name: If version is the same, create a PR proposing new version and changelog for the next release
+          uses: release-plz/action@487eb7b5c085a664d5c5ca05f4159bd9b591182a # v0.5.120
+          with: { command: release-pr }
+          env:
+            GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
