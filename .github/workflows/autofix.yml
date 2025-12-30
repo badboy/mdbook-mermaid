@@ -18,4 +18,17 @@ jobs:
       - name: Run cargo fmt
         run: cargo fmt
       
+      - name: Update integration test snapshots if mermaid.js changed
+        run: |
+          if ! git diff --exit-code payload/mermaid.js > /dev/null 2>&1; then
+            echo "mermaid.js was updated, regenerating integration test snapshots..."
+            sudo apt-get update
+            sudo apt-get install -y chromium-browser
+            cargo install cargo-binstall
+            cargo binstall -y mdbook
+            cargo insta test --accept --test integration
+          else
+            echo "mermaid.js unchanged, skipping snapshot regeneration"
+          fi
+      
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27 # v1.3.2
