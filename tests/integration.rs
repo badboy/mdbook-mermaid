@@ -102,7 +102,7 @@ fn test_chapter_with_mermaid() {
     let content = regex::Regex::new(r"mermaid-diagram-\d+")
         .unwrap()
         .replace_all(&content, "mermaid-diagram-REDACTED");
-    let content = regex::Regex::new(r"toc-\d\.js+")
+    let content = regex::Regex::new(r"toc-\d+\.js")
         .unwrap()
         .replace_all(&content, "mermaid-diagram-REDACTED");
 
