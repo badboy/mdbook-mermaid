@@ -112,7 +112,7 @@ jobs:
       - name: Post Setup | Prepare artifacts [Windows]
         if: matrix.os == 'windows-latest'
         run: |
-          mkdir -p target/stage
+          New-Item -ItemType Directory -Force -Path target/stage
           cd target/${{ matrix.target }}/release
           strip ${{ env.CRATE_NAME }}.exe
           7z a ../../stage/${{ matrix.name }} ${{ env.CRATE_NAME }}.exe
