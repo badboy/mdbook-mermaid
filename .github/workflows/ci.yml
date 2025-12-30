@@ -109,25 +109,13 @@ jobs:
       - name: Build | Build
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Post Setup | Extract tag name
-        shell: bash
-        run: |
-          if [ -z "$ACT" ]; then
-            tag="${GITHUB_REF#refs/tags/}"
-          else
-            tag="v1.0.0"
-          fi
-
-          echo "tag=$tag" >> $GITHUB_OUTPUT
-        id: extract_tag
-
       - name: Post Setup | Prepare artifacts [Windows]
         if: matrix.os == 'windows-latest'
         run: |
           mkdir -p target/stage
           cd target/${{ matrix.target }}/release
           strip ${{ env.CRATE_NAME }}.exe
-          7z a ../../stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }} ${{ env.CRATE_NAME }}.exe
+          7z a ../../stage/${{ matrix.name }} ${{ env.CRATE_NAME }}.exe
           cd -
 
       - name: Post Setup | Prepare artifacts [-nix]
@@ -138,13 +126,13 @@ jobs:
           if [ "${{ matrix.target }}" != "aarch64-unknown-linux-musl" ]; then
             strip ${{ env.CRATE_NAME }}
           fi
-          tar czvf ../../stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }} ${{ env.CRATE_NAME }}
+          tar czvf ../../stage/${{ matrix.name }} ${{ env.CRATE_NAME }}
           cd -
 
       - name: Post Setup | Upload artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: ${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }}
+          name: ${{ matrix.name }}
           path: target/stage/*
   # This final step is needed to mark the whole workflow as successful
   # Don't change its name - it is used by the merge protection rules
@@ -192,6 +180,26 @@ jobs:
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           path: artifacts
+      - name: Rename artifacts with version
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
+        shell: bash
+        run: |
+          set -e
+          tag="${{ steps.release.outputs.tag }}"
+          cd artifacts
+          for dir in */; do
+            # Skip if no directories found
+            [ -d "$dir" ] || continue
+            artifact_name="${dir%/}"
+            cd "$dir"
+            for file in *; do
+              # Skip if no files found
+              [ -f "$file" ] || continue
+              # Rename to include version
+              mv "$file" "${{ env.CRATE_NAME }}-${tag}-${artifact_name}"
+            done
+            cd ..
+          done
       - name: Attach artifacts to release
         if: ${{ steps.release.outputs.releases_created == 'true' }}
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
