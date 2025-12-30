@@ -137,41 +137,6 @@ This is a trade-off for the benefits of pre-rendered SVG output.
 
 We have not currently explored parallelization or caching strategies to optimize build times.
 
-## Migration from mdbook-mermaid
-
-If you're migrating from the original `mdbook-mermaid` (client-side rendering):
-
-1. Install `mdbook-mermaid-ssr`:
-   ```bash
-   cargo install mdbook-mermaid-ssr
-   ```
-
-2. Update your `book.toml`:
-   ```toml
-   [preprocessor.mermaid-ssr]
-   ```
-
-3. Remove client-side JavaScript configuration:
-   ```toml
-   # Remove these lines if present:
-   [output.html]
-   additional-js = ["mermaid.min.js", "mermaid-init.js"]
-   ```
-
-4. Delete old JavaScript files from your book directory:
-   ```bash
-   rm -f mermaid.min.js mermaid-init.js
-   ```
-
-5. Ensure Chrome/Chromium is installed on your build system
-
-6. Rebuild your book:
-   ```bash
-   mdbook build
-   ```
-
-See [MIGRATION.md](MIGRATION.md) for detailed migration instructions.
-
 ## License
 
 MPL. See [LICENSE](LICENSE).  
