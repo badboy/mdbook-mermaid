@@ -22,7 +22,7 @@
     // Simplest way to make mermaid re-render the diagrams in the new theme is via refreshing the page
 
     for (const darkTheme of darkThemes) {
-        document.getElementById(darkTheme).addEventListener('click', () => {
+        document.getElementById('mdbook-theme-' + darkTheme).addEventListener('click', () => {
             if (lastThemeWasLight) {
                 window.location.reload();
             }
@@ -30,7 +30,7 @@
     }
 
     for (const lightTheme of lightThemes) {
-        document.getElementById(lightTheme).addEventListener('click', () => {
+        document.getElementById('mdbook-theme-' + lightTheme).addEventListener('click', () => {
             if (!lastThemeWasLight) {
                 window.location.reload();
             }
