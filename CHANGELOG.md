@@ -1,3 +1,7 @@
+# v0.17.1 (2026-08-14)
+
+* JavaScript: Fixed an issue that prevented the on click event listener from applying to the theme menu items
+
 # v0.17.0 (2025-11-18)
 
 * Update to mdbook v0.5 -- this now uses `mdbook-preprocessor`, which should make the build a bit faster
