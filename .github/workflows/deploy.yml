@@ -9,6 +9,9 @@ on:
 env:
   CRATE_NAME: mdbook-mermaid
 
+permissions:
+  contents: read
+
 jobs:
   # Build sources for every OS
   github_build:
@@ -46,9 +49,8 @@ jobs:
     steps:
       - name: Setup | Checkout
         uses: actions/checkout@v7
-
-      # Cache files between builds
-      - uses: Swatinem/rust-cache@v2
+        with:
+          persist-credentials: false
 
       - name: Setup | Rust
         uses: dtolnay/rust-toolchain@stable
@@ -122,23 +124,32 @@ jobs:
     name: Create GitHub Release
     needs: github_build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # to modify the release
     steps:
       - name: Setup | Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup | Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Setup | List Artifacts
+        run: |
+          ls -l dist/
 
       - name: Setup | Release notes
         run: |
           git log -1 --pretty='%s' > RELEASE.md
+          cat RELEASE.md
 
       - name: Build | Publish
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ env.CRATE_NAME }}-*/${{ env.CRATE_NAME }}-*
-          body_path: RELEASE.md
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$VERSION_TAG" -F RELEASE.md dist/*
