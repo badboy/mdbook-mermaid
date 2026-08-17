@@ -2,6 +2,7 @@ use clap::{crate_version, Arg, ArgMatches, Command};
 use mdbook_mermaid::Mermaid;
 use mdbook_preprocessor::errors::Error;
 use mdbook_preprocessor::Preprocessor;
+use semver::{Version, VersionReq};
 use toml_edit::{value, Array, Document, Item, Table, Value};
 
 use std::{
@@ -56,7 +57,10 @@ fn main() {
 fn handle_preprocessing() -> Result<(), Error> {
     let (ctx, book) = mdbook_preprocessor::parse_input(io::stdin())?;
 
-    if ctx.mdbook_version != mdbook_preprocessor::MDBOOK_VERSION {
+    let req = VersionReq::parse(&format!("^{}", mdbook_preprocessor::MDBOOK_VERSION)).unwrap();
+    let called_version = Version::parse(&ctx.mdbook_version).unwrap();
+
+    if !req.matches(&called_version) {
         eprintln!(
             "Warning: The mdbook-mermaid preprocessor was built against version \
              {} of mdbook, but we're being called from version {}",
